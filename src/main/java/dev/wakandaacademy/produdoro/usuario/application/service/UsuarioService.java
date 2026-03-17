@@ -1,12 +1,15 @@
 package dev.wakandaacademy.produdoro.usuario.application.service;
 
+import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.usuario.application.api.UsuarioCriadoResponse;
 import dev.wakandaacademy.produdoro.usuario.application.api.UsuarioNovoRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UsuarioService {
 	UsuarioCriadoResponse criaNovoUsuario(UsuarioNovoRequest usuarioNovo);
     UsuarioCriadoResponse buscaUsuarioPorId(UUID idUsuario);
 
+    List<TarefaListResponse> listaTodasTarefas();
 }
