@@ -35,12 +35,4 @@ public class UsuarioController implements UsuarioAPI {
 		log.info("[finaliza] UsuarioController - buscaUsuarioPorId");
 		return buscaUsuario;
 	}
-
-	@Override
-	public List<TarefaListResponse> usuarioListaTarefa(String token, UUID idUsuario) {
-		log.info("[inicia] UsuarioController - usuarioListaTarefa");
-	//a implementar
-		log.info("[finaliza] UsuarioController - usuarioListaTarefa");
-		return null;
-	}
 }

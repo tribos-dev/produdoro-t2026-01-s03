@@ -19,8 +19,5 @@ public interface UsuarioAPI {
 	@GetMapping(value = "/{idUsuario}")
 	@ResponseStatus(code = HttpStatus.OK)
 	UsuarioCriadoResponse buscaUsuarioPorId(@PathVariable UUID idUsuario);
-
-	@GetMapping(value = "/listarTarefas/{idUsuario}")
-	@ResponseStatus(code = HttpStatus.OK)
-	List<TarefaListResponse> usuarioListaTarefa(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
 }
+
