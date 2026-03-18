@@ -25,15 +25,15 @@ public class TarefaListResponse {
     private int posicaoTarefa;
 
     public TarefaListResponse(Tarefa tarefa) {
-        this.idTarefa = getIdTarefa();
-        this.descricao = getDescricao();
-        this.idUsuario = getIdUsuario();
-        this.idArea = getIdArea();
-        this.idProjeto = getIdProjeto();
-        this.status = getStatus();
-        this.statusAtivacao = getStatusAtivacao();
-        this.contagemPomodoro = getContagemPomodoro();
-        this.posicaoTarefa = getPosicaoTarefa();
+        this.idTarefa = tarefa.getIdTarefa();
+        this.descricao = tarefa.getDescricao();
+        this.idUsuario = tarefa.getIdUsuario();
+        this.idArea = tarefa.getIdArea();
+        this.idProjeto = tarefa.getIdProjeto();
+        this.status = tarefa.getStatus();
+        this.statusAtivacao = tarefa.getStatusAtivacao();
+        this.contagemPomodoro = tarefa.getContagemPomodoro();
+        this.posicaoTarefa = tarefa.getPosicaoTarefa();
     }
 
     public static List<TarefaListResponse> converte(List<Tarefa> tarefa) {

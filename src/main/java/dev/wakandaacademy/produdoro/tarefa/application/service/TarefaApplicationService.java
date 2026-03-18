@@ -2,6 +2,7 @@ package dev.wakandaacademy.produdoro.tarefa.application.service;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
+import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
@@ -41,6 +42,17 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.pertenceAoUsuario(usuarioPorEmail);
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
         return tarefa;
+    }
+
+    @Override
+    public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
+        usuarioRepository.buscaUsuarioPorId(idUsuario);
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        usuarioPorEmail.validaUsuario(idUsuario);
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
+        log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
+        return TarefaListResponse.converte(tarefas);
     }
 
     @Override
