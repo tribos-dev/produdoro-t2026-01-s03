@@ -105,4 +105,10 @@ public class TarefaApplicationService implements TarefaService {
     }
 
 
+
+    @Override
+    public void concluiTarefa(String usuario, UUID idTarefa) {
+        log.info("[inicia] TarefaApplicationService - concluiTarefa");
+        log.info("[finaliza] TarefaApplicationService - concluiTarefa");
+    }
 }
