@@ -39,9 +39,8 @@ public class UsuarioController implements UsuarioAPI {
 	@Override
 	public List<TarefaListResponse> usuarioListaTarefa(String token, UUID idUsuario) {
 		log.info("[inicia] UsuarioController - usuarioListaTarefa");
-		List<TarefaListResponse> tarefaListResponses = usuarioAppplicationService
-				.listaTodasTarefas();
+	//a implementar
 		log.info("[finaliza] UsuarioController - usuarioListaTarefa");
-		return tarefaListResponses;
+		return null;
 	}
 }
