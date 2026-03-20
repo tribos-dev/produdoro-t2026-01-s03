@@ -51,4 +51,8 @@ public class Tarefa {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
 		}
 	}
+
+    public void alteraOrdem(int novaPosicao) {
+        this.ordemTarefa = novaPosicao;
+    }
 }

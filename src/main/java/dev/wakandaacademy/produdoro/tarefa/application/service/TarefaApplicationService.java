@@ -12,6 +12,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,7 +46,9 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public void alteraOrdemTarefa(String usuario, UUID idTarefa, int novaPosicao) {
         log.info("[inicia] TarefaApplicationService - alteraOrdemTarefa");
-        log.info("teste");
+        Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
+        List<Tarefa> tarefas = new ArrayList<>();
+        tarefa.alteraOrdem(novaPosicao);
         log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");
 
     }
