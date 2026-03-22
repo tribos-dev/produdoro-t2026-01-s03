@@ -55,4 +55,15 @@ public class Tarefa {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
 		}
 	}
+
+    public void mudaStatusParaConcluida() {
+		VeficaSeTarefaFoiConcluida();
+		this.status = StatusTarefa.CONCLUIDA;
+	}
+
+	private void VeficaSeTarefaFoiConcluida() {
+		if (this.status == StatusTarefa.CONCLUIDA) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Essa Tarefa Já Está Concluida");
+		}
+	}
 }
