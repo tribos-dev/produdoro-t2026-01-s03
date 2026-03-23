@@ -33,4 +33,11 @@ public class UsuarioController implements UsuarioAPI {
 		log.info("[finaliza] UsuarioController - buscaUsuarioPorId");
 		return buscaUsuario;
 	}
+
+	@Override
+	public void mudaStatusParaPausaCurta(String email, UUID idUsuario) {
+		log.info("[inicia] UsuarioController - mudaStatusParaPausaCurta");
+		usuarioAppplicationService.mudaStatusParaPausaCurta(email, idUsuario);
+		log.info("[finaliza] UsuarioController - mudaStatusParaPausaCurta");
+	}
 }
