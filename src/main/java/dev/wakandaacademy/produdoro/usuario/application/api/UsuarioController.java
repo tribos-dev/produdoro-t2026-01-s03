@@ -2,7 +2,6 @@ package dev.wakandaacademy.produdoro.usuario.application.api;
 
 import javax.validation.Valid;
 
-import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,7 +9,6 @@ import dev.wakandaacademy.produdoro.usuario.application.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
