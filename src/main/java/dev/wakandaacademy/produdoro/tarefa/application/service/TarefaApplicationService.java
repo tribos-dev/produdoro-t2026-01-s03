@@ -110,6 +110,9 @@ public class TarefaApplicationService implements TarefaService {
     public void concluiTarefa(String usuario, UUID idTarefa) {
         log.info("[inicia] TarefaApplicationService - concluiTarefa");
         Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
+        if (tarefa.getStatus() == StatusTarefa.CONCLUIDA) {
+            throw APIException.build(HttpStatus.BAD_REQUEST,"Tarefa já está concuída");
+        }
         tarefa.mudaStatusParaConcluida();
         tarefaRepository.salva(tarefa);
         log.info("[finaliza] TarefaApplicationService - concluiTarefa");
