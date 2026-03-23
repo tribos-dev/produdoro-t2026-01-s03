@@ -2,6 +2,7 @@ package dev.wakandaacademy.produdoro.tarefa.application.repository;
 
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 
+import javax.validation.constraints.Email;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
