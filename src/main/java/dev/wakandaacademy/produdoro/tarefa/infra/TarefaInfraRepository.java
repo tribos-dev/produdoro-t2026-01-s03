@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,5 +37,12 @@ public class TarefaInfraRepository implements TarefaRepository {
         Optional<Tarefa> tarefaPorId = tarefaSpringMongoDBRepository.findByIdTarefa(idTarefa);
         log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
         return tarefaPorId;
+    }
+
+    @Override
+    public void deletaTodasTarefas(List<Tarefa> tarefas) {
+        log.info("[inicia] TarefaInfraRepository - deletaTodasTarefas");
+        tarefaSpringMongoDBRepository.deleteAll(tarefas);
+        log.info("[finaliza] TarefaInfraRepository - deletaTodasTarefas");
     }
 }
