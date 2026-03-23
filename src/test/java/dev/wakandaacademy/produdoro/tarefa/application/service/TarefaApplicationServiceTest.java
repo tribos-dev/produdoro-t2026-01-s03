@@ -1,19 +1,21 @@
 package dev.wakandaacademy.produdoro.tarefa.application.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRestController;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
+import org.apiguardian.api.API;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +26,9 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
+import org.springframework.http.HttpStatus;
+
+import javax.xml.crypto.Data;
 
 @ExtendWith(MockitoExtension.class)
 class TarefaApplicationServiceTest {
@@ -62,26 +67,17 @@ class TarefaApplicationServiceTest {
     UsuarioRepository usuarioRepository;
 
     @Test
-    void TestbuscarTodasTarefas () {
-        String usuarioEmail = "teste@gmail.com";
-        UUID idUsuario = UUID.randomUUID();
-
-        Usuario usuarioMock = mock(Usuario.class);
+    void deveBuscarTodasTarefas () {
+        Usuario usuario = DataHelper.createUsuario();
+        UUID idUsuario = usuario.getIdUsuario();
+        String usuarioEmail = "usuario@email.com";
+        List<Tarefa> tarefas = DataHelper.createListTarefa();
 
         when(usuarioRepository.buscaUsuarioPorId(idUsuario))
-                .thenReturn(usuarioMock);
+                .thenReturn(usuario);
 
-        when(usuarioRepository.buscaUsuarioPorEmail(usuarioEmail))
-                .thenReturn(usuarioMock);
-
-        doNothing().when(usuarioMock).validaUsuario(idUsuario);
-
-        Tarefa tarefaMock = mock(Tarefa.class);
-
-        when(tarefaMock.getIdTarefa()).thenReturn(UUID.randomUUID());
-        when(tarefaMock.getDescricao()).thenReturn("desc");
-
-        List<Tarefa> tarefas = List.of(tarefaMock);
+        when(usuarioRepository.buscaUsuarioPorEmail(any()))
+                .thenReturn(usuario);
 
         when(tarefaRepository.buscaTarefaPorIdUsuario(idUsuario))
                 .thenReturn(tarefas);
@@ -90,11 +86,30 @@ class TarefaApplicationServiceTest {
                 tarefaApplicationService.buscarTodasTarefas(usuarioEmail, idUsuario);
 
         assertNotNull(resultado);
-        assertEquals(1, resultado.size());
-
-        verify(usuarioRepository).buscaUsuarioPorId(idUsuario);
-        verify(usuarioRepository).buscaUsuarioPorEmail(usuarioEmail);
-        verify(tarefaRepository).buscaTarefaPorIdUsuario(idUsuario);
+        assertEquals(8, resultado.size());
     }
 
+    @Test
+    void deveBuscarTodasTarefasSeListaVazia () {
+        Usuario usuario = DataHelper.createUsuario();
+        UUID idUsuario = usuario.getIdUsuario();
+        String usuarioEmail = "usuario@email.com";
+        List<Tarefa> tarefas = List.of();
+
+        when(usuarioRepository.buscaUsuarioPorId(idUsuario))
+                .thenReturn(usuario);
+
+        when(usuarioRepository.buscaUsuarioPorEmail(any()))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorIdUsuario(idUsuario))
+                .thenReturn(tarefas);
+
+        List<TarefaListResponse> resultado =
+                tarefaApplicationService.buscarTodasTarefas(usuarioEmail, idUsuario);
+
+        assertNotNull(resultado);
+        assertEquals(0, resultado.size());
+
+    }
 }
