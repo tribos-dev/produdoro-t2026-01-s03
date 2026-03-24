@@ -37,6 +37,12 @@ public class UsuarioController implements UsuarioAPI {
 	@Override
 	public void mudaStatusParaPausaLonga(String token, UUID idUsuario) {
 		log.info("[inicia] UsuarioController - mudaStatusParaPausaLonga");
+		String usuario = validaToken(token);
+		usuarioAppplicationService.mudaStatusParaPausaLonga(usuario, idUsuario);
 		log.info("[Finaliza] UsuarioController - mudaStatusParaPausaLonga");
 	}
+
+    private String validaToken(String token) {
+        return null;
+    }
 }
