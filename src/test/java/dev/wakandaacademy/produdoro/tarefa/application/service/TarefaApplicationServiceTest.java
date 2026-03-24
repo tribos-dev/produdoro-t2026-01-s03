@@ -3,10 +3,14 @@ package dev.wakandaacademy.produdoro.tarefa.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.UUID;
 
+import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
+import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import dev.wakandaacademy.produdoro.DataHelper;
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
@@ -60,6 +64,39 @@ class TarefaApplicationServiceTest {
     public TarefaRequest getTarefaRequest() {
         TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
         return request;
+    }
+
+    // Teste usuario deleta todas as suas tarefas
+
+    // Mock Bean
+    @Mock
+    UsuarioRepository usuarioRepository;
+
+    @Test
+    void deveDeletarTarefaUsuario () {
+        String usuarioPorEmail = "test@email";
+        Usuario usuario = DataHelper.createUsuario();
+        List<Tarefa> tarefas = DataHelper.createListTarefa();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuarioPorEmail))
+                .thenReturn(usuario);
+
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario()))
+                .thenReturn(tarefas);
+
+        doNothing().when(tarefaRepository).deletaTodasTarefas(tarefas);
+
+        tarefaApplicationService.deletaTodasTarefas(usuarioPorEmail, usuario.getIdUsuario());
+
+        // ASSERT (verify)
+        verify(usuarioRepository).buscaUsuarioPorEmail(usuarioPorEmail);
+        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
+        //verify(usuario).validaUsuario(usuario.getIdUsuario());
+        verify(tarefaRepository).buscaTarefaPorIdUsuario(usuario.getIdUsuario());
+        verify(tarefaRepository).deletaTodasTarefas(tarefas);
     }
 
     @Test
