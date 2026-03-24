@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -19,40 +20,64 @@ import java.util.UUID;
 @Getter
 @Document(collection = "Tarefa")
 public class Tarefa {
-	@Id
-	private UUID idTarefa;
-	@NotBlank
-	private String descricao;
-	@Indexed
-	private UUID idUsuario;
-	@Indexed
-	private UUID idArea;
-	@Indexed
-	private UUID idProjeto;
-	private StatusTarefa status;
-	private StatusAtivacaoTarefa statusAtivacao;
-	private int contagemPomodoro;
-	@PositiveOrZero
-	private int ordemTarefa;
+    @Id
+    private UUID idTarefa;
+    @NotBlank
+    private String descricao;
+    @Indexed
+    private UUID idUsuario;
+    @Indexed
+    private UUID idArea;
+    @Indexed
+    private UUID idProjeto;
+    private StatusTarefa status;
+    private StatusAtivacaoTarefa statusAtivacao;
+    private int contagemPomodoro;
+    @PositiveOrZero
+    private int ordemTarefa;
 
-	public Tarefa(TarefaRequest tarefaRequest) {
-		this.idTarefa = UUID.randomUUID();
-		this.idUsuario = tarefaRequest.getIdUsuario();
-		this.descricao = tarefaRequest.getDescricao();
-		this.idArea = tarefaRequest.getIdArea();
-		this.idProjeto = tarefaRequest.getIdProjeto();
-		this.status = StatusTarefa.A_FAZER;
-		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
-		this.contagemPomodoro = 1;
-	}
+    public Tarefa(TarefaRequest tarefaRequest) {
+        this.idTarefa = UUID.randomUUID();
+        this.idUsuario = tarefaRequest.getIdUsuario();
+        this.descricao = tarefaRequest.getDescricao();
+        this.idArea = tarefaRequest.getIdArea();
+        this.idProjeto = tarefaRequest.getIdProjeto();
+        this.status = StatusTarefa.A_FAZER;
+        this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+        this.contagemPomodoro = 1;
+    }
 
-	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
-		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
-			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
-		}
-	}
+    public void pertenceAoUsuario(Usuario usuarioPorEmail) {
+        if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
+            throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
+        }
+    }
 
-    public void alteraOrdem(int novaPosicao) {
+    public void alteraOrdem(List<Tarefa> tarefas, int novaPosicao) {
+
+        int posicaoAtual = this.getOrdemTarefa();
+
+        if(novaPosicao < 0){
+            throw APIException.build(HttpStatus.UNPROCESSABLE_ENTITY, "Posição não pode ser negativa!");
+        }
+
+        if (posicaoAtual == novaPosicao) {
+            throw APIException.build(HttpStatus.CONFLICT, "Posição da Tarefa é igual a nova posicao");
+        }
+        if (posicaoAtual > novaPosicao) {
+            for (Tarefa t : tarefas) {
+                if (t.getOrdemTarefa() >= novaPosicao && t.getOrdemTarefa() < posicaoAtual) {
+                    t.ordemTarefa++;
+                }
+
+            }
+        }else {
+            for (Tarefa t : tarefas) {
+                if (t.getOrdemTarefa() > posicaoAtual && t.getOrdemTarefa() <= novaPosicao) {
+                    t.ordemTarefa--;
+                }
+            }
+        }
         this.ordemTarefa = novaPosicao;
     }
 }
