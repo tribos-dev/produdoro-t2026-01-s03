@@ -49,6 +49,7 @@ public class TarefaApplicationService implements TarefaService {
         Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
         List<Tarefa> tarefas = new ArrayList<>();
         tarefa.alteraOrdem(tarefas, novaPosicao);
+        tarefaRepository.salvaTarefas(tarefas);
         log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");
 
     }
