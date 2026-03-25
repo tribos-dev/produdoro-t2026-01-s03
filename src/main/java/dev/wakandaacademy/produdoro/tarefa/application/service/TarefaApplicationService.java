@@ -54,7 +54,7 @@ public class TarefaApplicationService implements TarefaService {
             throw APIException.build(HttpStatus.CONFLICT, "Usuário não possui tarefa(as) cadastrada(as)");
         }
         tarefaRepository.deletaTodasTarefas(tarefas);
-        log.info("[finaliza] Tare faApplicationService - deletaTodasTarefas");
+        log.info("[finaliza] TarefaApplicationService - deletaTodasTarefas");
     }
 
     @Override
