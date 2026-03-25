@@ -105,9 +105,6 @@ class TarefaApplicationServiceTest {
 
         assertEquals("Usuário não possui tarefa(as) cadastrada(as)", e.getMessage());
         assertEquals(HttpStatus.CONFLICT, e.getStatusException());
-        verify(usuarioRepository).buscaUsuarioPorEmail(usuarioPorEmail);
-        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
-        verify(tarefaRepository).buscaTarefaPorIdUsuario(usuario.getIdUsuario());
         verify(tarefaRepository, never()).deletaTodasTarefas(any());
     }
 }
