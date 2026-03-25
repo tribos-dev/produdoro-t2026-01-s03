@@ -77,10 +77,8 @@ class TarefaApplicationServiceTest {
 
         tarefaApplicationService.deletaTodasTarefas(usuarioPorEmail, usuario.getIdUsuario());
 
-        // ASSERT (verify)
         verify(usuarioRepository).buscaUsuarioPorEmail(usuarioPorEmail);
         verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
-        //verify(usuario).validaUsuario(usuario.getIdUsuario());
         verify(tarefaRepository).buscaTarefaPorIdUsuario(usuario.getIdUsuario());
         verify(tarefaRepository).deletaTodasTarefas(tarefas);
     }
