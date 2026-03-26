@@ -31,6 +31,7 @@ public class TarefaApplicationService implements TarefaService {
         log.info("[finaliza] TarefaApplicationService - criaNovaTarefa");
         return TarefaIdResponse.builder().idTarefa(tarefaCriada.getIdTarefa()).build();
     }
+
     @Override
     public Tarefa detalhaTarefa(String usuario, UUID idTarefa) {
         log.info("[inicia] TarefaApplicationService - detalhaTarefa");
@@ -55,13 +56,16 @@ public class TarefaApplicationService implements TarefaService {
         }
         tarefaRepository.deletaTodasTarefas(tarefas);
         log.info("[finaliza] TarefaApplicationService - deletaTodasTarefas");
+    }
+
+    @Override
     public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
         usuarioRepository.buscaUsuarioPorId(idUsuario);
         Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioPorEmail.validaUsuario(idUsuario);
-        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
+        List<Tarefa> tarefa = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
         log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
-        return TarefaListResponse.converte(tarefas);
+        return TarefaListResponse.converte(tarefa);
     }
 }
