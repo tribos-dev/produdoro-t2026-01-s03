@@ -36,12 +36,25 @@ public class Usuario {
 	private StatusUsuario status = StatusUsuario.FOCO;
 	@Builder.Default
 	private Integer quantidadePomodorosPausaCurta = 0;
-	
+
 	public Usuario(UsuarioNovoRequest usuarioNovo, ConfiguracaoPadrao configuracaoPadrao) {
 		this.idUsuario = UUID.randomUUID();
 		this.email = usuarioNovo.getEmail();
 		this.status = StatusUsuario.FOCO;
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
+	}
+
+
+	public void incrementaPomodoro() {
+		statusEstaFoco();
+		quantidadePomodorosPausaCurta++;
+		int limite = 3;
+		if (quantidadePomodorosPausaCurta > limite) {
+			this.status = StatusUsuario.PAUSA_LONGA;
+			this.quantidadePomodorosPausaCurta = 0;
+		} else {
+			this.status = StatusUsuario.PAUSA_CURTA;
+		}
 	}
 	public void iniciarPausaLonga(UUID idUsuario){
 		verificaUsuario(idUsuario);
@@ -66,4 +79,10 @@ public class Usuario {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é valida");
 		}
     }
+}
+
+	private void statusEstaFoco() {
+		if (!status.equals(StatusUsuario.FOCO))
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Usuario precisa estar em foco para incrementar pomodoro a uma tarefa!");
+	}
 }

@@ -67,4 +67,10 @@ public class Tarefa {
 			throw APIException.build(HttpStatus.BAD_REQUEST, "Essa Tarefa Já Está Concluida");
 		}
 	}
+
+	public void incrementaPomodoro(Usuario usuario) {
+		pertenceAoUsuario(usuario);
+		usuario.incrementaPomodoro();
+		this.contagemPomodoro++;
+	}
 }
