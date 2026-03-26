@@ -13,7 +13,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -52,5 +54,28 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.mudaStatusParaConcluida();
         tarefaRepository.salva(tarefa);
         log.info("[finaliza] TarefaApplicationService - concluiTarefa");
+    }
+
+    @Override
+    public void deletaTarefasConcluidas(String usuario, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - deletaTarefasConcluidas");
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        usuarioPorEmail.pertenceAoUsuario(usuarioPorEmail.getIdUsuario());
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefasDoUsuario(idUsuario);
+        List<Tarefa> tarefasConcluidas = BuscaTarefasConcluidas(tarefas);
+        validaSeExisteTarefasConcluidas(tarefasConcluidas);
+        tarefaRepository.deletaTarefasConcluidas(tarefasConcluidas);
+        log.info("[finaliza] TarefaApplicationService - deletaTarefasConcluidas");
+    }
+
+    private void validaSeExisteTarefasConcluidas(List<Tarefa> tarefasConcluidas) {
+        if (tarefasConcluidas.isEmpty())
+            throw APIException.build(HttpStatus.NOT_FOUND, "Usuário não possui nenhuma tarefa concluída!");
+    }
+
+    private List<Tarefa> BuscaTarefasConcluidas(List<Tarefa> tarefas) {
+        return tarefas.stream()
+                .filter(tarefa -> tarefa.getStatus() == StatusTarefa.CONCLUIDA)
+                .collect(Collectors.toList());
     }
 }
