@@ -43,8 +43,6 @@ public class Usuario {
 		this.status = StatusUsuario.FOCO;
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
-
-
 	public void incrementaPomodoro() {
 		statusEstaFoco();
 		quantidadePomodorosPausaCurta++;
@@ -56,6 +54,7 @@ public class Usuario {
 			this.status = StatusUsuario.PAUSA_CURTA;
 		}
 	}
+
 	public void iniciarPausaLonga(UUID idUsuario){
 		verificaUsuario(idUsuario);
 		verificaSeEstaEmPausaLonga();

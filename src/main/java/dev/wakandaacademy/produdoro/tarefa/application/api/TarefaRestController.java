@@ -1,17 +1,16 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import dev.wakandaacademy.produdoro.config.security.service.TokenService;
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.service.TarefaService;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Log4j2
@@ -46,7 +45,14 @@ public class TarefaRestController implements TarefaAPI {
 
 	@Override
 	public List<TarefaListResponse> usuarioListaTarefa (String token, UUID idUsuario) {
-	public List<TarefaListResponse> usuarioListaTarefa(String token, UUID idUsuario) {
+	public void incrementaPomodoro(String token, UUID idTarefa) {
+		log.info("[start] TarefaRestController - incrementaPomodoro");
+		String usuario = getUsuarioByToken(token);
+		tarefaService.incrementaPomodoro(usuario, idTarefa);
+		log.info("[finish] TarefaRestController - incrementaPomodoro");
+	}
+
+	@Override
 		log.info("[inicia] TarefaRestController - usuarioListaTarefa");
 		String usuario = getUsuarioByToken(token);
 		List<TarefaListResponse> tarefas = tarefaService.buscarTodasTarefas(usuario, idUsuario);
