@@ -4,10 +4,6 @@ import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.Value;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
