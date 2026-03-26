@@ -23,3 +23,4 @@ public interface UsuarioAPI {
 	void iniciarPausaLonga(@RequestHeader(name = "Authorization",required = true) String token, @PathVariable UUID idUsuario);
 
 }
+

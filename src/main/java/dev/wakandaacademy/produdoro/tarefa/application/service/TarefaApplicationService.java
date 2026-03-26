@@ -2,6 +2,7 @@ package dev.wakandaacademy.produdoro.tarefa.application.service;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
+import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
@@ -12,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,5 +41,29 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.pertenceAoUsuario(usuarioPorEmail);
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
         return tarefa;
+    }
+
+    @Override
+    public void incrementaPomodoro(String usuario, UUID idTarefa) {
+        log.info("[start] TarefaApplicationService - incrementaPomodoro");
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        tarefa.incrementaPomodoro(usuarioPorEmail);
+        tarefaRepository.salva(tarefa);
+        usuarioRepository.salva(usuarioPorEmail);
+        log.debug("[finish] TarefaApplicationService - incrementaPomodoro");
+    }
+
+
+
+    @Override
+    public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
+        usuarioRepository.buscaUsuarioPorId(idUsuario);
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        usuarioPorEmail.validaUsuario(idUsuario);
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
+        log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
+        return TarefaListResponse.converte(tarefas);
     }
 }
