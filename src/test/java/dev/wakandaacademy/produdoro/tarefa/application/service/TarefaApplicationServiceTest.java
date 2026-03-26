@@ -14,16 +14,13 @@ import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioReposi
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import dev.wakandaacademy.produdoro.DataHelper;
 import dev.wakandaacademy.produdoro.handler.APIException;
-import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
-import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRestController;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
-import org.apiguardian.api.API;
+import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,8 +40,6 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import org.springframework.http.HttpStatus;
-
-import javax.xml.crypto.Data;
 
 @ExtendWith(MockitoExtension.class)
 class TarefaApplicationServiceTest {
@@ -78,6 +73,7 @@ class TarefaApplicationServiceTest {
         return request;
     }
 
+    // Teste usuario deleta todas as suas tarefas
     @Test
     void deveIncrementarPomodoroQuandoTarefaPertenceAoUsuario() {
         Tarefa tarefa = DataHelper.createTarefa();
@@ -107,6 +103,57 @@ class TarefaApplicationServiceTest {
         assertEquals("Tarefa não encontrada!", exception.getMessage());
         verify(tarefaRepository, never()).salva(any());
     }
+
+    @Test
+    void deveDeletarTarefaUsuario () {
+        String usuarioPorEmail = "test@email";
+        Usuario usuario = DataHelper.createUsuario();
+        List<Tarefa> tarefas = DataHelper.createListTarefa();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuarioPorEmail))
+                .thenReturn(usuario);
+
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario()))
+                .thenReturn(tarefas);
+
+        doNothing().when(tarefaRepository).deletaTodasTarefas(tarefas);
+
+        tarefaApplicationService.deletaTodasTarefas(usuarioPorEmail, usuario.getIdUsuario());
+
+        verify(usuarioRepository).buscaUsuarioPorEmail(usuarioPorEmail);
+        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
+        verify(tarefaRepository).buscaTarefaPorIdUsuario(usuario.getIdUsuario());
+        verify(tarefaRepository).deletaTodasTarefas(tarefas);
+    }
+
+    @Test
+    void excecaoTarefasVazia () {
+        String usuarioPorEmail = "test@email";
+        Usuario usuario = DataHelper.createUsuario();
+        List<Tarefa> tarefas = List.of();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuarioPorEmail))
+                .thenReturn(usuario);
+
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario()))
+                .thenReturn(tarefas);
+
+        APIException e = assertThrows(APIException.class, () ->
+                tarefaApplicationService.deletaTodasTarefas(usuarioPorEmail, usuario.getIdUsuario())
+        );
+
+        assertEquals("Usuário não possui tarefa(as) cadastrada(as)", e.getMessage());
+        assertEquals(HttpStatus.CONFLICT, e.getStatusException());
+        verify(tarefaRepository, never()).deletaTodasTarefas(any());
+    }
+
+    // Teste usuario visualiza todas as suas tarefas
 
     @Test
     void deveBuscarTodasTarefas () {

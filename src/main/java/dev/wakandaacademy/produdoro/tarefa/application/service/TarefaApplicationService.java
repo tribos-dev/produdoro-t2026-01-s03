@@ -31,6 +31,7 @@ public class TarefaApplicationService implements TarefaService {
         log.info("[finaliza] TarefaApplicationService - criaNovaTarefa");
         return TarefaIdResponse.builder().idTarefa(tarefaCriada.getIdTarefa()).build();
     }
+
     @Override
     public Tarefa detalhaTarefa(String usuario, UUID idTarefa) {
         log.info("[inicia] TarefaApplicationService - detalhaTarefa");
@@ -44,6 +45,19 @@ public class TarefaApplicationService implements TarefaService {
     }
 
     @Override
+    public void deletaTodasTarefas(String usuario, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - deletaTodasTarefas");
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        usuarioRepository.buscaUsuarioPorId(idUsuario);
+        usuarioPorEmail.validaUsuario(idUsuario);
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
+        if (tarefas.isEmpty()) {
+            throw APIException.build(HttpStatus.CONFLICT, "Usuário não possui tarefa(as) cadastrada(as)");
+        }
+        tarefaRepository.deletaTodasTarefas(tarefas);
+        log.info("[finaliza] TarefaApplicationService - deletaTodasTarefas");
+    }
+
     public void incrementaPomodoro(String usuario, UUID idTarefa) {
         log.info("[start] TarefaApplicationService - incrementaPomodoro");
         Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
@@ -62,8 +76,8 @@ public class TarefaApplicationService implements TarefaService {
         usuarioRepository.buscaUsuarioPorId(idUsuario);
         Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioPorEmail.validaUsuario(idUsuario);
-        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
+        List<Tarefa> tarefa = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
         log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
-        return TarefaListResponse.converte(tarefas);
+        return TarefaListResponse.converte(tarefa);
     }
 }
