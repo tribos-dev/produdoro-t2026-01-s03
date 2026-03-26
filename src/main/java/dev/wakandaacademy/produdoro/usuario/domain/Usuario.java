@@ -74,15 +74,15 @@ public class Usuario {
 		}
 	}
 
-    public void validaUsuario(UUID idUsuario) {
+	private void statusEstaFoco() {
+		if (!this.status.equals(StatusUsuario.FOCO)) {
+		}	throw APIException.build(HttpStatus.BAD_REQUEST, "Usuario precisa estar em foco para incrementar pomodoro a uma tarefa!");
+	}
+
+	public void validaUsuario(UUID idUsuario) {
         if (!this.idUsuario.equals(idUsuario)) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é valida");
 		}
     }
-}
 
-	private void statusEstaFoco() {
-		if (!status.equals(StatusUsuario.FOCO))
-			throw APIException.build(HttpStatus.BAD_REQUEST, "Usuario precisa estar em foco para incrementar pomodoro a uma tarefa!");
-	}
 }
