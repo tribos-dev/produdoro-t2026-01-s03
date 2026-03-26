@@ -108,12 +108,6 @@ class TarefaApplicationServiceTest {
         verify(tarefaRepository, never()).salva(any());
     }
 
-    // Teste usuario visualiza todas as suas tarefas
-
-    // MockBean
-    @Mock
-    UsuarioRepository usuarioRepository;
-
     @Test
     void deveBuscarTodasTarefas () {
         Usuario usuario = DataHelper.createUsuario();

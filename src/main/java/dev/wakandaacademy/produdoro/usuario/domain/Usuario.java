@@ -43,8 +43,6 @@ public class Usuario {
 		this.status = StatusUsuario.FOCO;
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
-
-
 	public void incrementaPomodoro() {
 		statusEstaFoco();
 		quantidadePomodorosPausaCurta++;
@@ -54,6 +52,18 @@ public class Usuario {
 			this.quantidadePomodorosPausaCurta = 0;
 		} else {
 			this.status = StatusUsuario.PAUSA_CURTA;
+		}
+	}
+
+	public void iniciarPausaLonga(UUID idUsuario){
+		validaUsuario(idUsuario);
+		verificaSeEstaEmPausaLonga();
+		this.status = StatusUsuario.PAUSA_LONGA;
+	}
+
+	private void verificaSeEstaEmPausaLonga() {
+		if(this.status == StatusUsuario.PAUSA_LONGA){
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuario já está em PAUSA LONGA");
 		}
 	}
 
