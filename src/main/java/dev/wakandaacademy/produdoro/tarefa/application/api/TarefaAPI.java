@@ -29,12 +29,6 @@ public interface TarefaAPI {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     void usuarioDeletaTodasTarefas(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
 
-
-    @PatchMapping("/conclui-tarefa/{idTarefa}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    void concluiTarefa(@RequestHeader(name = "Authorization",required = true) String token,
-                       @PathVariable UUID idTarefa);
-
     @PatchMapping("incrementa-pomodoro/{idTarefa}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void incrementaPomodoro(@RequestHeader(name = "Authorization", required = true) String token,

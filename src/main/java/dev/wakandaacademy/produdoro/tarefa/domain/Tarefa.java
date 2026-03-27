@@ -73,15 +73,4 @@ public class Tarefa {
 		usuario.incrementaPomodoro();
 		this.contagemPomodoro++;
 	}
-
-    public void mudaStatusParaConcluida() {
-		VeficaSeTarefaFoiConcluida();
-		this.status = StatusTarefa.CONCLUIDA;
-	}
-
-	private void VeficaSeTarefaFoiConcluida() {
-		if (this.status == StatusTarefa.CONCLUIDA) {
-			throw APIException.build(HttpStatus.BAD_REQUEST, "Essa Tarefa Já Está Concluida");
-		}
-	}
 }

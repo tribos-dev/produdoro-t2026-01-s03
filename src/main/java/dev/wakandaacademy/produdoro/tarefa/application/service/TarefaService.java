@@ -14,6 +14,4 @@ public interface TarefaService {
     void incrementaPomodoro(String usuario, UUID idTarefa);
     void deletaTodasTarefas(String usuario, UUID idUsuario);
     List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
-    void deletaTodasTarefas(String usuario, UUID idUsuario);
-    void incrementaPomodoro(String usuario, UUID idTarefa);
 }

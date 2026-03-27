@@ -71,17 +71,6 @@ public class TarefaApplicationService implements TarefaService {
     }
 
     @Override
-    public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
-        log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
-        usuarioRepository.buscaUsuarioPorId(idUsuario);
-        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
-        usuarioPorEmail.validaUsuario(idUsuario);
-        List<Tarefa> tarefa = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
-        log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
-        return TarefaListResponse.converte(tarefa);
-    }
-
-    @Override
     public void concluiTarefa(String usuario, UUID idTarefa) {
         log.info("[inicia] TarefaApplicationService - concluiTarefa");
         Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
@@ -102,19 +91,5 @@ public class TarefaApplicationService implements TarefaService {
         tarefaRepository.salva(tarefa);
         usuarioRepository.salva(usuarioPorEmail);
         log.debug("[finish] TarefaApplicationService - incrementaPomodoro");
-    }
-
-
-
-    @Override
-    public void concluiTarefa(String usuario, UUID idTarefa) {
-        log.info("[inicia] TarefaApplicationService - concluiTarefa");
-        Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
-        if (tarefa.getStatus() == StatusTarefa.CONCLUIDA) {
-            throw APIException.build(HttpStatus.BAD_REQUEST,"Tarefa já está concuída");
-        }
-        tarefa.mudaStatusParaConcluida();
-        tarefaRepository.salva(tarefa);
-        log.info("[finaliza] TarefaApplicationService - concluiTarefa");
     }
 }
