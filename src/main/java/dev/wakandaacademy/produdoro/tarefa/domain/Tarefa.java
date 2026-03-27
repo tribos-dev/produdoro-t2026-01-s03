@@ -36,7 +36,7 @@ public class Tarefa {
     @PositiveOrZero
     private int ordemTarefa;
 
-    public Tarefa(TarefaRequest tarefaRequest) {
+    public Tarefa(TarefaRequest tarefaRequest, int ordemTarefa) {
         this.idTarefa = UUID.randomUUID();
         this.idUsuario = tarefaRequest.getIdUsuario();
         this.descricao = tarefaRequest.getDescricao();
@@ -45,6 +45,7 @@ public class Tarefa {
         this.status = StatusTarefa.A_FAZER;
         this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
         this.contagemPomodoro = 1;
+        this.ordemTarefa = ordemTarefa;
     }
 
     public void pertenceAoUsuario(Usuario usuarioPorEmail) {
@@ -64,12 +65,12 @@ public class Tarefa {
         if (posicaoAtual == novaPosicao) {
             throw APIException.build(HttpStatus.CONFLICT, "Posição da Tarefa é igual a nova posicao");
         }
+
         if (posicaoAtual > novaPosicao) {
             for (Tarefa t : tarefas) {
                 if (t.getOrdemTarefa() >= novaPosicao && t.getOrdemTarefa() < posicaoAtual) {
                     t.ordemTarefa++;
                 }
-
             }
         }else {
             for (Tarefa t : tarefas) {

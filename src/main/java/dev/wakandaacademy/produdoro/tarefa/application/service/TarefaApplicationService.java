@@ -27,7 +27,8 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public TarefaIdResponse criaNovaTarefa(TarefaRequest tarefaRequest) {
         log.info("[inicia] TarefaApplicationService - criaNovaTarefa");
-        Tarefa tarefaCriada = tarefaRepository.salva(new Tarefa(tarefaRequest));
+        int ordemTarefa = tarefaRepository.contaTarefasDoUsuario(tarefaRequest.getIdUsuario());
+        Tarefa tarefaCriada = tarefaRepository.salva(new Tarefa(tarefaRequest, ordemTarefa));
         log.info("[finaliza] TarefaApplicationService - criaNovaTarefa");
         return TarefaIdResponse.builder().idTarefa(tarefaCriada.getIdTarefa()).build();
     }
@@ -35,9 +36,9 @@ public class TarefaApplicationService implements TarefaService {
     public Tarefa detalhaTarefa(String usuario, UUID idTarefa) {
         log.info("[inicia] TarefaApplicationService - detalhaTarefa");
         Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
-        log.info("[usuarioPorEmail] {}", usuarioPorEmail);
         Tarefa tarefa =
-                tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+                tarefaRepository.buscaTarefaPorId(idTarefa)
+                        .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
         tarefa.pertenceAoUsuario(usuarioPorEmail);
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
         return tarefa;
@@ -51,6 +52,5 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.alteraOrdem(tarefas, novaPosicao);
         tarefaRepository.salvaTarefas(tarefas);
         log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");
-
     }
 }
