@@ -51,7 +51,7 @@ public class Tarefa {
         this.status = StatusTarefa.A_FAZER;
         this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
         this.contagemPomodoro = 1;
-        this.ordemTarefa = ordemTarefa;
+        this.ordemTarefa = ordemTarefa + 1;
     }
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
@@ -70,14 +70,13 @@ public class Tarefa {
 
         int posicaoAtual = this.getOrdemTarefa();
 
-        if(novaPosicao < 0){
-            throw APIException.build(HttpStatus.UNPROCESSABLE_ENTITY, "Posição não pode ser negativa!");
-        }
+        verificaLimitesDePosicoes(tarefas, novaPosicao);
+        verificaSePosicaoEIgual(novaPosicao, posicaoAtual);
+        alteraPosicoesDeOutrasTarefas(tarefas, novaPosicao, posicaoAtual);
+        this.ordemTarefa = novaPosicao;
+    }
 
-        if (posicaoAtual == novaPosicao) {
-            throw APIException.build(HttpStatus.CONFLICT, "Posição da Tarefa é igual a nova posicao");
-        }
-
+    private void alteraPosicoesDeOutrasTarefas(List<Tarefa> tarefas, int novaPosicao, int posicaoAtual) {
         if (posicaoAtual > novaPosicao) {
             for (Tarefa t : tarefas) {
                 if (t.getOrdemTarefa() >= novaPosicao && t.getOrdemTarefa() < posicaoAtual) {
@@ -91,6 +90,18 @@ public class Tarefa {
                 }
             }
         }
-        this.ordemTarefa = novaPosicao;
+    }
+
+    private void verificaSePosicaoEIgual(int novaPosicao, int posicaoAtual) {
+        if (posicaoAtual == novaPosicao) {
+            throw APIException.build(HttpStatus.CONFLICT, "Posição da Tarefa é igual a nova posicao");
+        }
+    }
+
+    private void verificaLimitesDePosicoes(List<Tarefa> tarefas, int novaPosicao) {
+        if(novaPosicao < 0 || novaPosicao > tarefas.size()) {
+            throw APIException.build(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Posição não pode ser negativa ou maior que o numero de tarefas!");
+        }
     }
 }

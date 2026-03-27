@@ -13,8 +13,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +22,6 @@ import java.util.UUID;
 public class TarefaApplicationService implements TarefaService {
     private final TarefaRepository tarefaRepository;
     private final UsuarioRepository usuarioRepository;
-
 
     @Override
     public TarefaIdResponse criaNovaTarefa(TarefaRequest tarefaRequest) {
@@ -72,8 +69,6 @@ public class TarefaApplicationService implements TarefaService {
         log.debug("[finish] TarefaApplicationService - incrementaPomodoro");
     }
 
-
-
     @Override
     public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
@@ -86,10 +81,13 @@ public class TarefaApplicationService implements TarefaService {
     }
 
     @Override
-    public void alteraOrdemTarefa(String usuario, UUID idTarefa, int novaPosicao) {
+    public void alteraOrdemTarefa(String email, UUID idTarefa, int novaPosicao) {
         log.info("[inicia] TarefaApplicationService - alteraOrdemTarefa");
-        Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
-        List<Tarefa> tarefas = new ArrayList<>();
+        Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(email);
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario());
+        Tarefa tarefa = tarefas.stream().filter(t -> t.getIdTarefa().equals(idTarefa))
+                .findFirst()
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
         tarefa.alteraOrdem(tarefas, novaPosicao);
         tarefaRepository.salvaTarefas(tarefas);
         log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");

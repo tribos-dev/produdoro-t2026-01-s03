@@ -62,15 +62,8 @@ public class TarefaInfraRepository implements TarefaRepository {
     @Override
     public int contaTarefasDoUsuario(UUID idUsuario) {
         log.info("[inicia] TarefaInfraRepository - contaTarefasDoUsuario");
-
-        Optional<Tarefa> ultimaTarefa = tarefaSpringMongoDBRepository
-                .findTopByIdUsuarioOrderByOrdemTarefaDesc(idUsuario);
-
-        int proximaOrdem = ultimaTarefa
-                .map(tarefa -> tarefa.getOrdemTarefa() + 1)
-                .orElse(1);
-
+        int quantidadeTarefas = tarefaSpringMongoDBRepository.countByIdUsuario(idUsuario);
         log.info("[finaliza] TarefaInfraRepository - contaTarefasDoUsuario");
-        return proximaOrdem;
+        return quantidadeTarefas;
     }
 }
