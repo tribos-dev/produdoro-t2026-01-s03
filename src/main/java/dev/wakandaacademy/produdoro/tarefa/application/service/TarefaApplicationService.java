@@ -84,12 +84,23 @@ public class TarefaApplicationService implements TarefaService {
     public void alteraOrdemTarefa(String email, UUID idTarefa, int novaPosicao) {
         log.info("[inicia] TarefaApplicationService - alteraOrdemTarefa");
         Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(email);
+        validaTarefaDoUsuario(idTarefa, usuario.getIdUsuario());
         List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario());
-        Tarefa tarefa = tarefas.stream().filter(t -> t.getIdTarefa().equals(idTarefa))
+        Tarefa tarefa = tarefas.stream()
+                .filter(t -> t.getIdTarefa().equals(idTarefa))
                 .findFirst()
-                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id da tarefa inválido!"));
         tarefa.alteraOrdem(tarefas, novaPosicao);
         tarefaRepository.salvaTarefas(tarefas);
         log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");
+    }
+
+    private void validaTarefaDoUsuario(UUID idTarefa, UUID idUsuario) {
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id da tarefa inválido!"));
+        if (!tarefa.getIdUsuario().equals(idUsuario)) {
+            throw APIException.build(HttpStatus.UNAUTHORIZED,
+                    "Usuário(a) não autorizado(a) para a requisição solicitada");
+        }
     }
 }
