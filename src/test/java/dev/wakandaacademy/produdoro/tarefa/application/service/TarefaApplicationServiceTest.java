@@ -204,4 +204,99 @@ class TarefaApplicationServiceTest {
         assertEquals(0, resultado.size());
 
     }
+
+    @Test
+    void deveAlterarOrdemTarefaComSucesso() {
+        Usuario usuario = DataHelper.createUsuario();
+
+        Tarefa tarefa1 = Tarefa.builder()
+                .idTarefa(UUID.randomUUID())
+                .descricao("t1")
+                .idUsuario(usuario.getIdUsuario())
+                .ordemTarefa(1)
+                .build();
+
+        Tarefa tarefa2 = Tarefa.builder()
+                .idTarefa(UUID.randomUUID())
+                .descricao("t2")
+                .idUsuario(usuario.getIdUsuario())
+                .ordemTarefa(2)
+                .build();
+
+        List<Tarefa> tarefas = new ArrayList<>();
+        tarefas.add(tarefa1);
+        tarefas.add(tarefa2);
+
+        String email = usuario.getEmail();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(email))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorId(tarefa1.getIdTarefa()))
+                .thenReturn(Optional.of(tarefa1));
+
+        when(tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario()))
+                .thenReturn(tarefas);
+
+        tarefaApplicationService.alteraOrdemTarefa(email, tarefa1.getIdTarefa(), 2);
+
+        verify(tarefaRepository).salvaTarefas(tarefas);
+    }
+
+    @Test
+    void deveLancarExcecao401QuandoUsuarioNaoForDonoDaTarefa() {
+        UUID idUsuario = UUID.randomUUID();
+        UUID idOutroUsuario = UUID.randomUUID();
+
+        Usuario usuario = Usuario.builder()
+                .idUsuario(idUsuario)
+                .email("user@email.com")
+                .build();
+
+        UUID idTarefa = UUID.randomUUID();
+
+        Tarefa tarefa = Tarefa.builder()
+                .idTarefa(idTarefa)
+                .descricao("teste")
+                .idUsuario(idOutroUsuario) // diferente
+                .ordemTarefa(1)
+                .build();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail()))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa))
+                .thenReturn(Optional.of(tarefa));
+
+        APIException exception = assertThrows(APIException.class, () ->
+                tarefaApplicationService.alteraOrdemTarefa(usuario.getEmail(), idTarefa, 1)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusException());
+
+        verify(tarefaRepository, never()).salvaTarefas(any());
+    }
+
+    @Test
+    void deveLancarExcecao404QuandoTarefaNaoExistirAlteraOrdem() {
+        Usuario usuario = DataHelper.createUsuario();
+
+        String email = usuario.getEmail();
+        UUID idTarefa = UUID.randomUUID();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(email))
+                .thenReturn(usuario);
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa))
+                .thenReturn(Optional.empty());
+
+        APIException exception = assertThrows(APIException.class, () ->
+                tarefaApplicationService.alteraOrdemTarefa(email, idTarefa, 2)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusException());
+        assertEquals("Id da tarefa inválido!", exception.getMessage());
+
+        verify(tarefaRepository, never()).salvaTarefas(any());
+    }
 }
