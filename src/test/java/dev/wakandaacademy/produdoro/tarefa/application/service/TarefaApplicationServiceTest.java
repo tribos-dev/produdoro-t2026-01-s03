@@ -6,6 +6,7 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
@@ -25,6 +26,8 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -174,4 +177,38 @@ class TarefaApplicationServiceTest {
 //                tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa())
 //        );
 //    }
+
+    @Test
+    void deveDefinirTarefaComoAtivaComSucesso() {
+        Usuario usuario = DataHelper.createUsuario();
+        UUID idTarefa = UUID.randomUUID();
+        Tarefa tarefa = DataHelper.createTarefa();
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefaAtivaDoUsuario(usuario)).thenReturn(Optional.empty());
+
+        tarefaApplicationService.defineTarefaComoAtiva(usuario.getEmail(), idTarefa);
+
+        assertEquals(StatusAtivacaoTarefa.ATIVA, tarefa.getStatusAtivacao());
+        verify(tarefaRepository).salva(tarefa);
+    }
+
+    @Test
+    void deveLancarConflitoQuandoTarefaJaEstaAtiva() {
+        Usuario usuario = DataHelper.createUsuario();
+        Tarefa tarefa = DataHelper.createTarefaAtiva();
+        UUID idTarefa = tarefa.getIdTarefa();
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefaAtivaDoUsuario(usuario)).thenReturn(Optional.of(tarefa));
+
+        APIException excecao = assertThrows(APIException.class,
+                () -> tarefaApplicationService.defineTarefaComoAtiva(usuario.getEmail(), idTarefa));
+
+        assertEquals(HttpStatus.CONFLICT, excecao.getStatusException());
+        assertEquals("Tarefa já está ativa!", excecao.getMessage());
+        verify(tarefaRepository, never()).salva(any());
+    }
 }
