@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -120,6 +121,43 @@ class TarefaApplicationServiceTest {
         tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa());
 
         assertEquals(StatusTarefa.CONCLUIDA, tarefa.getStatus());
+    }
+
+    @Test
+    void deveDeletarTarefasConcluidas() {
+        Usuario usuario = DataHelper.createUsuario();
+
+        List<Tarefa> tarefas = List.of(
+                Tarefa.builder()
+                        .idUsuario(usuario.getIdUsuario())
+                        .status(StatusTarefa.CONCLUIDA)
+                        .build()
+        );
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario())).thenReturn(tarefas);
+
+        tarefaApplicationService.deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario());
+
+        verify(tarefaRepository).deletaTarefasConcluidas(anyList());
+    }
+
+    @Test
+    void deveLancarExecaoQuandoNaoExitirTarefasConcluidasPraDeletar() {
+        Usuario usuario = DataHelper.createUsuario();
+
+        List<Tarefa> tarefas = List.of(
+                Tarefa.builder()
+                        .idUsuario(usuario.getIdUsuario())
+                        .status(StatusTarefa.CONCLUIDA)
+                        .build()
+        );
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario())).thenReturn(Collections.emptyList());
+
+        assertThrows(APIException.class, () -> tarefaApplicationService.
+                deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario()));
     }
 
 //    @Test
