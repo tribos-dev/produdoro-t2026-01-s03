@@ -43,6 +43,12 @@ public class Usuario {
 		this.status = StatusUsuario.FOCO;
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
+
+    public void pertenceAoUsuario(UUID idUsuario) {
+		if (!this.idUsuario.equals(idUsuario))
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "usuário(a) não autorizado(a) para a requisição solicitada!");
+    }
+	
 	public void incrementaPomodoro() {
 		statusEstaFoco();
 		quantidadePomodorosPausaCurta++;

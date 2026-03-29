@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -59,8 +60,8 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public void deletaTodasTarefas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - deletaTodasTarefas");
-        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioRepository.buscaUsuarioPorId(idUsuario);
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioPorEmail.validaUsuario(idUsuario);
         List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
         if (tarefas.isEmpty()) {
@@ -83,6 +84,40 @@ public class TarefaApplicationService implements TarefaService {
     }
 
     @Override
+    public void deletaTarefasConcluidas(String usuario, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - deletaTarefasConcluidas");
+        Usuario usuarioPorId = usuarioRepository.buscaUsuarioPorId(idUsuario);
+        pertenceAoUsuario(usuario, idUsuario);
+        List<Tarefa> tarefasConcluidas = tarefaRepository.buscaTarefasConcluidas(idUsuario);
+        if (tarefasConcluidas == null || tarefasConcluidas.isEmpty()) {
+            throw APIException.build(HttpStatus.CONFLICT,
+                    "Usuário não possui tarefas concluídas para deletar"
+            );
+        }
+
+        tarefaRepository.deletaTarefasConcluidas(tarefasConcluidas);
+
+        log.info("[finaliza] TarefaApplicationService - deletaTarefasConcluidas");
+    }
+
+    private void pertenceAoUsuario(String usuarioEmail, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - validaUsuario");
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+        usuarioPorEmail.pertenceAoUsuario(idUsuario);
+        log.info("[finaliza] TarefaApplicationService - validaUsuario");
+    }
+
+
+    private void validaSeExisteTarefasConcluidas(List<Tarefa> tarefasConcluidas) {
+        if (tarefasConcluidas.isEmpty())
+            throw APIException.build(HttpStatus.NOT_FOUND, "Usuário não possui nenhuma tarefa concluída!");
+    }
+
+    private List<Tarefa> BuscaTarefasConcluidas(List<Tarefa> tarefas) {
+        return tarefas.stream()
+                .filter(tarefa -> tarefa.getStatus() == StatusTarefa.CONCLUIDA)
+                .collect(Collectors.toList());
+    }
     public void incrementaPomodoro(String usuario, UUID idTarefa) {
         log.info("[start] TarefaApplicationService - incrementaPomodoro");
         Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
