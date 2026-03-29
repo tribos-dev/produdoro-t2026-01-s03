@@ -87,7 +87,7 @@ public class TarefaApplicationService implements TarefaService {
     public void deletaTarefasConcluidas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - deletaTarefasConcluidas");
         Usuario usuarioPorId = usuarioRepository.buscaUsuarioPorId(idUsuario);
-        validaUsuario(usuario, idUsuario);
+        pertenceAoUsuario(usuario, idUsuario);
         List<Tarefa> tarefasConcluidas = tarefaRepository.buscaTarefasConcluidas(idUsuario);
         if (tarefasConcluidas == null || tarefasConcluidas.isEmpty()) {
             throw APIException.build(HttpStatus.CONFLICT,
@@ -100,10 +100,10 @@ public class TarefaApplicationService implements TarefaService {
         log.info("[finaliza] TarefaApplicationService - deletaTarefasConcluidas");
     }
 
-    private void validaUsuario(String usuarioEmail, UUID idUsuario) {
+    private void pertenceAoUsuario(String usuarioEmail, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - validaUsuario");
         Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
-        usuarioPorEmail.validaUsuario(idUsuario);
+        usuarioPorEmail.pertenceAoUsuario(idUsuario);
         log.info("[finaliza] TarefaApplicationService - validaUsuario");
     }
 
