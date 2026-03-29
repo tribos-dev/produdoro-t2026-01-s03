@@ -55,14 +55,8 @@ public class Usuario {
 		}
 	}
 
-	public void validaUsuario(UUID idUsuario) {
-		if (!this.idUsuario.equals(idUsuario)) {
-			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é valida");
-		}
-	}
-}
 	public void iniciarPausaLonga(UUID idUsuario){
-		validaUsuario(idUsuario);
+		verificaUsuario(idUsuario);
 		verificaSeEstaEmPausaLonga();
 		this.status = StatusUsuario.PAUSA_LONGA;
 	}
@@ -70,6 +64,12 @@ public class Usuario {
 	private void verificaSeEstaEmPausaLonga() {
 		if(this.status == StatusUsuario.PAUSA_LONGA){
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuario já está em PAUSA LONGA");
+		}
+	}
+
+	private void verificaUsuario(UUID idUsuario){
+		if(!this.idUsuario.equals(idUsuario)){
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de Autenticação não é Válida");
 		}
 	}
 

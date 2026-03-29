@@ -10,9 +10,8 @@ import java.util.UUID;
 public interface TarefaService {
     TarefaIdResponse criaNovaTarefa(TarefaRequest tarefaRequest);
     Tarefa detalhaTarefa(String usuario, UUID idTarefa);
+    void concluiTarefa(String usuario, UUID idTarefa);
     void incrementaPomodoro(String usuario, UUID idTarefa);
-
     void deletaTodasTarefas(String usuario, UUID idUsuario);
-
     List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
 }
