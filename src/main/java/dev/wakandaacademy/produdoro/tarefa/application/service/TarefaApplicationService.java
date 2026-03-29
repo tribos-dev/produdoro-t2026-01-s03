@@ -60,8 +60,8 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public void deletaTodasTarefas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - deletaTodasTarefas");
-        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioRepository.buscaUsuarioPorId(idUsuario);
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         usuarioPorEmail.validaUsuario(idUsuario);
         List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(idUsuario);
         if (tarefas.isEmpty()) {
@@ -86,14 +86,27 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public void deletaTarefasConcluidas(String usuario, UUID idUsuario) {
         log.info("[inicia] TarefaApplicationService - deletaTarefasConcluidas");
-        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
-        usuarioPorEmail.pertenceAoUsuario(usuarioPorEmail.getIdUsuario());
-        List<Tarefa> tarefas = tarefaRepository.buscaTarefasDoUsuario(idUsuario);
-        List<Tarefa> tarefasConcluidas = BuscaTarefasConcluidas(tarefas);
-        validaSeExisteTarefasConcluidas(tarefasConcluidas);
+        Usuario usuarioPorId = usuarioRepository.buscaUsuarioPorId(idUsuario);
+        validaUsuario(usuario, idUsuario);
+        List<Tarefa> tarefasConcluidas = tarefaRepository.buscaTarefasConcluidas(idUsuario);
+        if (tarefasConcluidas == null || tarefasConcluidas.isEmpty()) {
+            throw APIException.build(HttpStatus.CONFLICT,
+                    "Usuário não possui tarefas concluídas para deletar"
+            );
+        }
+
         tarefaRepository.deletaTarefasConcluidas(tarefasConcluidas);
+
         log.info("[finaliza] TarefaApplicationService - deletaTarefasConcluidas");
     }
+
+    private void validaUsuario(String usuarioEmail, UUID idUsuario) {
+        log.info("[inicia] TarefaApplicationService - validaUsuario");
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+        usuarioPorEmail.validaUsuario(idUsuario);
+        log.info("[finaliza] TarefaApplicationService - validaUsuario");
+    }
+
 
     private void validaSeExisteTarefasConcluidas(List<Tarefa> tarefasConcluidas) {
         if (tarefasConcluidas.isEmpty())
