@@ -10,9 +10,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TarefaSpringMongoDBRepository extends MongoRepository<Tarefa, UUID> {
+
     Optional<Tarefa> findByIdTarefa(UUID idTarefa);
     List<Tarefa> findAllTarefaByidUsuario(UUID idUsuario);
     List<Tarefa> findAllByIdUsuario(UUID idUsuario);
     List<Tarefa> findAllByIdUsuarioAndStatus(UUID idUsuario, StatusTarefa statusTarefa);
     Optional<Tarefa> findByIdUsuarioAndStatusAtivacao(UUID idUsuario, StatusAtivacaoTarefa statusAtivacaoTarefa);
+    int countByIdUsuario(UUID idUsuario);
 }

@@ -1,5 +1,10 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
+import java.util.List;
+import java.util.UUID;
+
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +21,8 @@ public interface TarefaAPI {
 
     @GetMapping("/{idTarefa}")
     @ResponseStatus(code = HttpStatus.OK)
-    TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization",required = true) String token, 
-    		@PathVariable UUID idTarefa);
+    TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization", required = true) String token,
+                                          @PathVariable UUID idTarefa);
 
     @PatchMapping("/conclui-tarefa/{idTarefa}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
@@ -37,7 +42,6 @@ public interface TarefaAPI {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void incrementaPomodoro(@RequestHeader(name = "Authorization", required = true) String token,
                             @PathVariable UUID idTarefa);
-
     @GetMapping(value = "/listarTarefas/{idUsuario}")
     @ResponseStatus(code = HttpStatus.OK)
     List<TarefaListResponse> usuarioListaTarefa(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
@@ -47,5 +51,12 @@ public interface TarefaAPI {
     void defineTarefaComoAtiva(
             @RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idTarefa);
 
-}
 
+    @PatchMapping("/{idTarefa}/altera-posicao/{novaPosicao}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void alteraOrdemTarefa(@RequestHeader(name = "Authorization",required = true) String token,
+                           @PathVariable UUID idTarefa,
+                           @PathVariable int novaPosicao);
+
+
+}

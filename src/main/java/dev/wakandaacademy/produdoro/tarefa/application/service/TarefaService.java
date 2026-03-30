@@ -16,4 +16,6 @@ public interface TarefaService {
     void deletaTodasTarefas(String usuario, UUID idUsuario);
     List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
     void defineTarefaComoAtiva(String usuarioEmail, UUID idTarefa);
+
+    void alteraOrdemTarefa(String usuario, UUID idTarefa, int novaPosicao);
 }
