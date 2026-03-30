@@ -48,7 +48,7 @@ public class Usuario {
 		if (!this.idUsuario.equals(idUsuario))
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "usuário(a) não autorizado(a) para a requisição solicitada!");
     }
-	
+
 	public void incrementaPomodoro() {
 		statusEstaFoco();
 		quantidadePomodorosPausaCurta++;
@@ -89,5 +89,18 @@ public class Usuario {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é valida");
 		}
     }
+
+
+    public void mudaStatusparaFoco(UUID idUsuario) {
+   		pertenceAoUsuario(idUsuario);
+		verificaSeEstaEmFoco();
+		this.status = StatusUsuario.FOCO;
+    }
+
+	private void verificaSeEstaEmFoco() {
+		if (this.status.equals(StatusUsuario.FOCO)) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já está em foco");
+		}
+	}
 
 }
