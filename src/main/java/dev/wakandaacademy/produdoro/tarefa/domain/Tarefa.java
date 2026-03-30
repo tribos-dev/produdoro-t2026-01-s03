@@ -9,14 +9,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.http.HttpStatus;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,37 +19,47 @@ import java.util.UUID;
 @Getter
 @Document(collection = "Tarefa")
 public class Tarefa {
-    @Id
-    private UUID idTarefa;
-    @NotBlank
-    private String descricao;
-    @Indexed
-    private UUID idUsuario;
-    @Indexed
-    private UUID idArea;
-    @Indexed
-    private UUID idProjeto;
-    private StatusTarefa status;
-    private StatusAtivacaoTarefa statusAtivacao;
-    private int contagemPomodoro;
-    @PositiveOrZero
-    private int ordemTarefa;
+	@Id
+	private UUID idTarefa;
+	@NotBlank
+	private String descricao;
+	@Indexed
+	private UUID idUsuario;
+	@Indexed
+	private UUID idArea;
+	@Indexed
+	private UUID idProjeto;
+	private StatusTarefa status;
+	private StatusAtivacaoTarefa statusAtivacao;
+	private int contagemPomodoro;
+	private int ordemTarefa;
 
-    public Tarefa(TarefaRequest tarefaRequest, int ordemTarefa) {
-        this.idTarefa = UUID.randomUUID();
-        this.idUsuario = tarefaRequest.getIdUsuario();
-        this.descricao = tarefaRequest.getDescricao();
-        this.idArea = tarefaRequest.getIdArea();
-        this.idProjeto = tarefaRequest.getIdProjeto();
-        this.status = StatusTarefa.A_FAZER;
-        this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
-        this.contagemPomodoro = 1;
-        this.ordemTarefa = ordemTarefa + 1;
-    }
+	public Tarefa(TarefaRequest tarefaRequest,int ordemTarefa) {
+		this.idTarefa = UUID.randomUUID();
+		this.idUsuario = tarefaRequest.getIdUsuario();
+		this.descricao = tarefaRequest.getDescricao();
+		this.idArea = tarefaRequest.getIdArea();
+		this.idProjeto = tarefaRequest.getIdProjeto();
+		this.status = StatusTarefa.A_FAZER;
+		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+		this.contagemPomodoro = 1;
+		this.ordemTarefa = ordemTarefa + 1;
+	}
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
 		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
+		}
+	}
+
+    public void mudaStatusParaConcluida() {
+		VeficaSeTarefaFoiConcluida();
+		this.status = StatusTarefa.CONCLUIDA;
+	}
+
+	private void VeficaSeTarefaFoiConcluida() {
+		if (this.status == StatusTarefa.CONCLUIDA) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Essa Tarefa Já Está Concluida");
 		}
 	}
 
@@ -104,4 +107,15 @@ public class Tarefa {
                     "Posição não pode ser negativa ou maior que o numero de tarefas!");
         }
     }
+
+	public void desativaTarefa() {
+		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+	}
+
+	public void ativaTarefa() {
+		if (this.statusAtivacao.equals(StatusAtivacaoTarefa.ATIVA)) {
+			throw APIException.build(HttpStatus.CONFLICT, "Tarefa já está ativa!");
+		}
+		this.statusAtivacao = StatusAtivacaoTarefa.ATIVA;
+	}
 }

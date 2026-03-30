@@ -8,6 +8,10 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/v1/tarefa")
 public interface TarefaAPI {
@@ -20,6 +24,16 @@ public interface TarefaAPI {
     TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization", required = true) String token,
                                           @PathVariable UUID idTarefa);
 
+    @PatchMapping("/conclui-tarefa/{idTarefa}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void concluiTarefa(@RequestHeader(name = "Authorization",required = true) String token,
+                       @PathVariable UUID idTarefa);
+
+    @DeleteMapping("/deleta-tarefas-concluidas/{idUsuario}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void deletaTarefasConcluidas(@RequestHeader(name = "Authorization", required = true) String token,
+                                 @PathVariable UUID idUsuario);
+
     @DeleteMapping(value = "/deletarTarefas/{idUsuario}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     void usuarioDeletaTodasTarefas(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
@@ -31,6 +45,12 @@ public interface TarefaAPI {
     @GetMapping(value = "/listarTarefas/{idUsuario}")
     @ResponseStatus(code = HttpStatus.OK)
     List<TarefaListResponse> usuarioListaTarefa(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
+
+    @PatchMapping("/{idTarefa}/ativa")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void defineTarefaComoAtiva(
+            @RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idTarefa);
+
 
     @PatchMapping("/{idTarefa}/altera-posicao/{novaPosicao}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)

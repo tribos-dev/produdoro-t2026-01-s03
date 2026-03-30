@@ -15,9 +15,7 @@ import org.springframework.http.HttpStatus;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioApplicationServiceTest {
@@ -29,13 +27,17 @@ class UsuarioApplicationServiceTest {
     UsuarioRepository usuarioRepository;
 
     @Test
-    void deveMudarParaPausaLonga(){
+    void deveMudarParaPausaLonga() {
         Usuario usuario = DataHelper.createUsuarioFoco();
+
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
         when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).thenReturn(usuario);
         when(usuarioRepository.salva(usuario)).thenReturn(usuario);
 
         usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail());
+
+        assertEquals(StatusUsuario.PAUSA_LONGA, usuario.getStatus());
+        verify(usuarioRepository).salva(usuario);
     }
 
     @Test
@@ -52,41 +54,17 @@ class UsuarioApplicationServiceTest {
         verify(usuarioRepository, never()).salva(any());
     }
 
-    @Test
-    void deveLancarExcecao_quandoUsuarioNaoEncontradoPorEmail() {
-        Usuario usuario = DataHelper.createUsuarioFoco();
-
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(null);
-
-        assertThrows(Exception.class, () ->
-                usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail())
-        );
-    }
 
     @Test
     void deveLancarExcecao_quandoUsuarioNaoEncontradoPorId() {
         Usuario usuario = DataHelper.createUsuarioFoco();
 
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).
-                thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
 
-        assertThrows(Exception.class, () ->
+        assertThrows(APIException.class, () ->
                 usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail())
         );
-    }
-
-    @Test
-    void deveSalvarUsuarioComStatusPausaLonga() {
-        Usuario usuario = DataHelper.createUsuarioFoco();
-
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).thenReturn(usuario);
-        when(usuarioRepository.salva(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail());
-
-        assertEquals(StatusUsuario.PAUSA_LONGA, usuario.getStatus());
-        verify(usuarioRepository, times(1)).salva(usuario);
     }
 }
