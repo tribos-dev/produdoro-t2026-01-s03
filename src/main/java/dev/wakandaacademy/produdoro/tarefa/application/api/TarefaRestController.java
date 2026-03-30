@@ -89,4 +89,11 @@ public class TarefaRestController implements TarefaAPI {
 		log.info("[finaliza] TarefaRestController - deletaTarefasConcluidas");
 	}
 
+	@Override
+	public void defineTarefaComoAtiva(String token, UUID idTarefa) {
+		log.info("[inicia] TarefaRestController - defineTarefaComoAtiva");
+		String usuarioEmail = getUsuarioByToken(token);
+		tarefaService.defineTarefaComoAtiva(usuarioEmail, idTarefa);
+		log.info("[finaliza] TarefaRestController - defineTarefaComoAtiva");
+	}
 }

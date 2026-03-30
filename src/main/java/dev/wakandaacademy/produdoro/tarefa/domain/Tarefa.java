@@ -66,4 +66,15 @@ public class Tarefa {
 		usuario.incrementaPomodoro();
 		this.contagemPomodoro++;
 	}
+
+	public void desativaTarefa() {
+		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+	}
+
+	public void ativaTarefa() {
+		if (this.statusAtivacao.equals(StatusAtivacaoTarefa.ATIVA)) {
+			throw APIException.build(HttpStatus.CONFLICT, "Tarefa já está ativa!");
+		}
+		this.statusAtivacao = StatusAtivacaoTarefa.ATIVA;
+	}
 }

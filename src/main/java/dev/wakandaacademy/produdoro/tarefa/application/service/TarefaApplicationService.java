@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -126,5 +127,24 @@ public class TarefaApplicationService implements TarefaService {
         tarefaRepository.salva(tarefa);
         usuarioRepository.salva(usuarioPorEmail);
         log.debug("[finish] TarefaApplicationService - incrementaPomodoro");
+    }
+
+    @Override
+    public void defineTarefaComoAtiva(String usuarioEmail, UUID idTarefa) {
+        log.info("[start] TarefaApplicationService - defineTarefaComoAtiva");
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id da tarefa inválido."));
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+        tarefa.pertenceAoUsuario(usuarioPorEmail);
+        tarefaRepository.buscaTarefaAtivaDoUsuario(usuarioPorEmail).ifPresent(
+                tarefaAntiga -> {
+                    if (!tarefaAntiga.getIdTarefa().equals(idTarefa)) {
+                        tarefaAntiga.desativaTarefa();
+                        tarefaRepository.salva(tarefaAntiga);
+                    }
+                }
+        );
+        tarefa.ativaTarefa();
+        tarefaRepository.salva(tarefa);
+        log.info("[finish] TarefaApplicationService - defineTarefaComoAtiva");
     }
 }

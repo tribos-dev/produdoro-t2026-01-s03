@@ -2,8 +2,10 @@ package dev.wakandaacademy.produdoro.tarefa.infra;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
+import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -76,5 +78,14 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[inicia] TarefaInfraRepository - deletaTodasTarefas");
         tarefaSpringMongoDBRepository.deleteAll(tarefas);
         log.info("[finaliza] TarefaInfraRepository - deletaTodasTarefas");
+    }
+
+    @Override
+    public Optional<Tarefa> buscaTarefaAtivaDoUsuario(Usuario usuario) {
+        log.info("[inicia] TarefaInfraRepository - buscaTarefaAtivaDoUsuario");
+        Optional<Tarefa> tarefaAtiva = tarefaSpringMongoDBRepository
+                .findByIdUsuarioAndStatusAtivacao(usuario.getIdUsuario(), StatusAtivacaoTarefa.ATIVA);
+        log.info("[finaliza] TarefaInfraRepository - buscaTarefaAtivaDoUsuario");
+        return tarefaAtiva;
     }
 }
