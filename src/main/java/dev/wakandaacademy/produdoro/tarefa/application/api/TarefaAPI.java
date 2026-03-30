@@ -1,18 +1,11 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
-import java.util.UUID;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/tarefa")
@@ -26,4 +19,29 @@ public interface TarefaAPI {
     TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization",required = true) String token, 
     		@PathVariable UUID idTarefa);
 
-}
+    @PatchMapping("/conclui-tarefa/{idTarefa}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void concluiTarefa(@RequestHeader(name = "Authorization",required = true) String token,
+                       @PathVariable UUID idTarefa);
+
+    @DeleteMapping("/deleta-tarefas-concluidas/{idUsuario}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void deletaTarefasConcluidas(@RequestHeader(name = "Authorization", required = true) String token,
+                                 @PathVariable UUID idUsuario);
+
+    @DeleteMapping(value = "/deletarTarefas/{idUsuario}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void usuarioDeletaTodasTarefas(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
+
+    @PatchMapping("incrementa-pomodoro/{idTarefa}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void incrementaPomodoro(@RequestHeader(name = "Authorization", required = true) String token,
+                            @PathVariable UUID idTarefa);
+
+    @GetMapping(value = "/listarTarefas/{idUsuario}")
+    @ResponseStatus(code = HttpStatus.OK)
+    List<TarefaListResponse> usuarioListaTarefa(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
+
+
+   }
+

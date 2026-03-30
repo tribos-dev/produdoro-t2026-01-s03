@@ -13,6 +13,7 @@ import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,7 +35,6 @@ public class UsuarioApplicationService implements UsuarioService {
 		return new UsuarioCriadoResponse(usuario);
 	}
 
-
 	@Override
 	public UsuarioCriadoResponse buscaUsuarioPorId(UUID idUsuario) {
 		log.info("[inicia] UsuarioApplicationService - buscaUsuarioPorId");
@@ -42,7 +42,16 @@ public class UsuarioApplicationService implements UsuarioService {
 		log.info("[finaliza] UsuarioApplicationService - buscaUsuarioPorId");
 		return new UsuarioCriadoResponse(usuario);
 	}
-
+	@Override
+	public void iniciarPausaLonga(UUID idUsuario, String usuarioEmail) {
+		log.info("[inicia] UsuarioApplicationService - iniciarPausaLonga");
+		log.info("[idUsuario] {}", idUsuario);
+		Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+		usuarioRepository.buscaUsuarioPorId(idUsuario);
+		usuario.iniciarPausaLonga(idUsuario);
+		usuarioRepository.salva(usuario);
+		log.info("[finaliza] UsuarioApplicationService - iniciarPausaLonga");
+	}
 	@Override
 	public void mudaStatusparaFoco(String usuarioEmail, UUID idUsuario) {
 		log.info("[inicia] UsuarioApplicationService - mudaStatusparaFoco");
@@ -52,6 +61,4 @@ public class UsuarioApplicationService implements UsuarioService {
 		usuarioRepository.salva(usuario);
 		log.info("[finaliza] UsuarioApplicationService - mudaStatusparaFoco");
 	}
-
-
 }
