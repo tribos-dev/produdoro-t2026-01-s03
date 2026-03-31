@@ -9,22 +9,53 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 class UsuarioApplicationServiceTest {
-
     @InjectMocks
-    UsuarioApplicationService usuarioApplicationService;
+    private UsuarioApplicationService usuarioApplicationService;
 
     @Mock
-    UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
+
+    @Test
+    void mudaStatusParaPausaCurta() {
+        Usuario usuario = DataHelper.createUsuario();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        usuarioApplicationService.mudaStatusParaPausaCurta(usuario.getEmail(), usuario.getIdUsuario());
+        assertEquals(StatusUsuario.PAUSA_CURTA, usuario.getStatus());
+        verify(usuarioRepository).buscaUsuarioPorEmail(usuario.getEmail());
+        verify(usuarioRepository).salva(usuario);
+
+
+    }
+
+    @Test
+    void naoDeveMudarStatusParaPausaCurtaQuandoUsuarioJaEstaEmPausaCurta() {
+        Usuario usuario = DataHelper.createUsuarioPausaCurta();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail()))
+                .thenReturn(usuario);
+
+        assertThrows(APIException.class, () ->
+                usuarioApplicationService.mudaStatusParaPausaCurta(
+                        usuario.getEmail(),
+                        usuario.getIdUsuario()
+                )
+        );
+        assertEquals(StatusUsuario.PAUSA_CURTA, usuario.getStatus());
+
+        verify(usuarioRepository).buscaUsuarioPorEmail(usuario.getEmail());
+    }
 
     @Test
     void deveMudarParaPausaLonga() {
@@ -53,7 +84,6 @@ class UsuarioApplicationServiceTest {
 
         verify(usuarioRepository, never()).salva(any());
     }
-
 
     @Test
     void deveLancarExcecao_quandoUsuarioNaoEncontradoPorId() {
