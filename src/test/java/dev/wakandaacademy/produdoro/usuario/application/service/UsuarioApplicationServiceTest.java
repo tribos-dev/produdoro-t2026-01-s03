@@ -1,6 +1,7 @@
 package dev.wakandaacademy.produdoro.usuario.application.service;
 
 import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.StatusUsuario;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,5 +36,27 @@ class UsuarioApplicationServiceTest {
         verify(usuarioRepository).salva(usuario);
 
 
+    }
+
+    @Test
+    void naoDeveMudarStatusParaPausaCurtaQuandoUsuarioJaEstaEmPausaCurta() {
+        Usuario usuario = DataHelper.createUsuarioPausaCurta();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail()))
+                .thenReturn(usuario);
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenReturn(usuario);
+
+        assertThrows(APIException.class, () ->
+                usuarioApplicationService.mudaStatusParaPausaCurta(
+                        usuario.getEmail(),
+                        usuario.getIdUsuario()
+                )
+        );
+
+        assertEquals(StatusUsuario.PAUSA_CURTA, usuario.getStatus());
+
+        verify(usuarioRepository).buscaUsuarioPorEmail(usuario.getEmail());
+        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
     }
 }
