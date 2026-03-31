@@ -3,8 +3,10 @@ package dev.wakandaacademy.produdoro.tarefa.application.api;
 import java.util.List;
 import java.util.UUID;
 
+import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import dev.wakandaacademy.produdoro.config.security.service.TokenService;
 import dev.wakandaacademy.produdoro.handler.APIException;
@@ -15,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -104,5 +107,13 @@ public class TarefaRestController implements TarefaAPI {
 		String usuarioEmail = getUsuarioByToken(token);
 		tarefaService.defineTarefaComoAtiva(usuarioEmail, idTarefa);
 		log.info("[finaliza] TarefaRestController - defineTarefaComoAtiva");
+	}
+
+	@Override
+	public void editaTarefa(String token, UUID idTarefa, String descricao) {
+		log.info("[inicia] TarefaRestController - editaTarefa");
+		String usuario = getUsuarioByToken(token);
+		tarefaService.editaTarefa(usuario, idTarefa, descricao);
+		log.info("[finaliza] TarefaRestController - editaTarefa");
 	}
 }

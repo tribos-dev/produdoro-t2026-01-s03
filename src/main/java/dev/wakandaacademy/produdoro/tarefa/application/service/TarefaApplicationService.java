@@ -26,6 +26,7 @@ public class TarefaApplicationService implements TarefaService {
     private final TarefaRepository tarefaRepository;
     private final UsuarioRepository usuarioRepository;
 
+
     @Override
     public TarefaIdResponse criaNovaTarefa(TarefaRequest tarefaRequest) {
         log.info("[inicia] TarefaApplicationService - criaNovaTarefa");
@@ -171,5 +172,17 @@ public class TarefaApplicationService implements TarefaService {
             throw APIException.build(HttpStatus.UNAUTHORIZED,
                     "Usuário(a) não autorizado(a) para a requisição solicitada");
         }
+    }
+
+    @Override
+    public void editaTarefa(String usuarioEmail, UUID idTarefa, String descricao) {
+        log.info("[inicia] TarefaApplicationService - editaTarefa");
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+        Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+        tarefa.pertenceAoUsuario(usuario);
+        tarefa.atualiza(descricao);
+        tarefaRepository.salva(tarefa);
+        log.info("[finaliza] TarefaApplicationService - editaTarefa");
     }
 }

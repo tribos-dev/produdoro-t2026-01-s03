@@ -42,6 +42,7 @@ public interface TarefaAPI {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void incrementaPomodoro(@RequestHeader(name = "Authorization", required = true) String token,
                             @PathVariable UUID idTarefa);
+
     @GetMapping(value = "/listarTarefas/{idUsuario}")
     @ResponseStatus(code = HttpStatus.OK)
     List<TarefaListResponse> usuarioListaTarefa(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
@@ -59,4 +60,12 @@ public interface TarefaAPI {
                            @PathVariable int novaPosicao);
 
 
+    @PatchMapping("/{idTarefa}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    void editaTarefa(
+            @RequestHeader(name = "Authorization", required = true) String token,
+            @PathVariable UUID idTarefa,
+            @RequestBody String descricao);
+
 }
+

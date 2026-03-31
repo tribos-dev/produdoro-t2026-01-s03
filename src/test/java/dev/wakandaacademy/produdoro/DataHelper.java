@@ -63,4 +63,8 @@ public class DataHelper {
                 .idUsuario(usuario1).descricao("descricao tarefa").statusAtivacao(StatusAtivacaoTarefa.ATIVA).build();
 
     }
+
+    public static Usuario createUsuario2() {
+        return Usuario.builder().email("outro@email.com").idUsuario(UUID.fromString("39fc8c70-f2fe-44ee-922b-5a5e96c50464")).status(StatusUsuario.FOCO).build();
+    }
 }
