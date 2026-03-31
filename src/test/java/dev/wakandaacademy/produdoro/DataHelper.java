@@ -57,4 +57,18 @@ public class DataHelper {
 
         );
     }
+
+    public static Usuario createUsuarioFoco() {
+        return Usuario.builder().email("email@email.com").idUsuario(usuario1).status(StatusUsuario.FOCO).build();
+    }
+
+    public static Tarefa createTarefaAtiva() {
+        return Tarefa.builder().contagemPomodoro(1).idTarefa(UUID.fromString("06fb5521-9d5a-461a-82fb-e67e3bedc6eb"))
+                .idUsuario(usuario1).descricao("descricao tarefa").statusAtivacao(StatusAtivacaoTarefa.ATIVA).build();
+
+    }
+
+    public static Usuario createUsuario2() {
+        return Usuario.builder().email("outro@email.com").idUsuario(UUID.fromString("39fc8c70-f2fe-44ee-922b-5a5e96c50464")).status(StatusUsuario.FOCO).build();
+    }
 }

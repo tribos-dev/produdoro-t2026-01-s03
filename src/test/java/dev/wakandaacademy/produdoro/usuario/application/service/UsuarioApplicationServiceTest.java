@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class UsuarioApplicationServiceTest {
@@ -25,14 +27,13 @@ class UsuarioApplicationServiceTest {
     private UsuarioRepository usuarioRepository;
 
     @Test
-    void mudaStatusParaPausaCurta () {
-        Usuario usuario = DataHelper.createUsuario() ;
+    void mudaStatusParaPausaCurta() {
+        Usuario usuario = DataHelper.createUsuario();
+
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).thenReturn(usuario);
         usuarioApplicationService.mudaStatusParaPausaCurta(usuario.getEmail(), usuario.getIdUsuario());
         assertEquals(StatusUsuario.PAUSA_CURTA, usuario.getStatus());
         verify(usuarioRepository).buscaUsuarioPorEmail(usuario.getEmail());
-        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
         verify(usuarioRepository).salva(usuario);
 
 
@@ -44,8 +45,6 @@ class UsuarioApplicationServiceTest {
 
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail()))
                 .thenReturn(usuario);
-        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
-                .thenReturn(usuario);
 
         assertThrows(APIException.class, () ->
                 usuarioApplicationService.mudaStatusParaPausaCurta(
@@ -53,10 +52,49 @@ class UsuarioApplicationServiceTest {
                         usuario.getIdUsuario()
                 )
         );
-
         assertEquals(StatusUsuario.PAUSA_CURTA, usuario.getStatus());
 
         verify(usuarioRepository).buscaUsuarioPorEmail(usuario.getEmail());
-        verify(usuarioRepository).buscaUsuarioPorId(usuario.getIdUsuario());
+    }
+
+    @Test
+    void deveMudarParaPausaLonga() {
+        Usuario usuario = DataHelper.createUsuarioFoco();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).thenReturn(usuario);
+        when(usuarioRepository.salva(usuario)).thenReturn(usuario);
+
+        usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail());
+
+        assertEquals(StatusUsuario.PAUSA_LONGA, usuario.getStatus());
+        verify(usuarioRepository).salva(usuario);
+    }
+
+    @Test
+    void deveLancarExcecao_quandoUsuarioForDiferenteDoAutenticado() {
+        Usuario usuario = DataHelper.createUsuarioFoco();
+        UUID outroId = UUID.randomUUID();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+
+        assertThrows(APIException.class, () ->
+                usuarioApplicationService.iniciarPausaLonga(outroId, usuario.getEmail())
+        );
+
+        verify(usuarioRepository, never()).salva(any());
+    }
+
+    @Test
+    void deveLancarExcecao_quandoUsuarioNaoEncontradoPorId() {
+        Usuario usuario = DataHelper.createUsuarioFoco();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+        when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario()))
+                .thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+        assertThrows(APIException.class, () ->
+                usuarioApplicationService.iniciarPausaLonga(usuario.getIdUsuario(), usuario.getEmail())
+        );
     }
 }
