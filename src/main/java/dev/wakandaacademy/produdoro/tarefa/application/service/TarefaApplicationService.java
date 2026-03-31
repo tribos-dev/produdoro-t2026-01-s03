@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -146,5 +145,17 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.ativaTarefa();
         tarefaRepository.salva(tarefa);
         log.info("[finish] TarefaApplicationService - defineTarefaComoAtiva");
+    }
+
+    @Override
+    public void editaTarefa(String usuarioEmail, UUID idTarefa, String descricao) {
+        log.info("[inicia] TarefaApplicationService - editaTarefa");
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+        Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(usuarioEmail);
+        tarefa.pertenceAoUsuario(usuario);
+        tarefa.atualiza(descricao);
+        tarefaRepository.salva(tarefa);
+        log.info("[finaliza] TarefaApplicationService - editaTarefa");
     }
 }

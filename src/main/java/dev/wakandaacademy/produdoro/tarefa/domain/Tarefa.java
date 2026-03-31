@@ -77,4 +77,11 @@ public class Tarefa {
 		}
 		this.statusAtivacao = StatusAtivacaoTarefa.ATIVA;
 	}
+
+	public void atualiza(String descricao) {
+		if (descricao == null || descricao.isBlank()) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "O campo não pode estar vazio");
+		}
+		this.descricao = descricao;
+	}
 }
