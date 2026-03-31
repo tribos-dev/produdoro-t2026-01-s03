@@ -211,4 +211,66 @@ class TarefaApplicationServiceTest {
         assertEquals("Tarefa já está ativa!", excecao.getMessage());
         verify(tarefaRepository, never()).salva(any());
     }
+
+    @Test
+    void deveEditarTarefaComSucesso() {
+        Usuario usuario = DataHelper.createUsuario();
+        Tarefa tarefa = DataHelper.createTarefa();
+        UUID idTarefa = tarefa.getIdTarefa();
+        String descricao = "Nova descrição";
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+
+        tarefaApplicationService.editaTarefa(usuario.getEmail(), idTarefa, descricao);
+
+        assertEquals("Nova descrição", tarefa.getDescricao());
+        verify(tarefaRepository).salva(tarefa);
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoEditarTarefaNaoEncontrada() {
+        Usuario usuario = DataHelper.createUsuario();
+        UUID idTarefa = UUID.randomUUID();
+        String descricao = "Nova descricao";
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.empty());
+
+        APIException exception = assertThrows(APIException.class, () ->
+                tarefaApplicationService.editaTarefa(usuario.getEmail(), idTarefa, descricao)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusException());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoUsuarioNaoForDonoDaTarefa() {
+        Usuario usuario2 = DataHelper.createUsuario2();
+
+        Tarefa tarefa = DataHelper.createTarefa();
+        UUID idTarefa = tarefa.getIdTarefa();
+        String descricao = "Nova descricao";
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario2.getEmail())).thenReturn(usuario2);
+
+        assertThrows(APIException.class, () ->
+                tarefaApplicationService.editaTarefa(usuario2.getEmail(), idTarefa, descricao)
+        );
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoDescricaoForInvalida() {
+        Usuario usuario = DataHelper.createUsuario();
+        Tarefa tarefa = DataHelper.createTarefa();
+        UUID idTarefa = tarefa.getIdTarefa();
+        String descricao = "";
+
+        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
+
+        assertThrows(APIException.class, () ->
+                tarefaApplicationService.editaTarefa(usuario.getEmail(), idTarefa, descricao));
+
+    }
 }
