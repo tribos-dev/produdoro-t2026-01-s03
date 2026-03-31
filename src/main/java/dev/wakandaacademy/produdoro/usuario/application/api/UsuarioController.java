@@ -51,4 +51,12 @@ public class UsuarioController implements UsuarioAPI {
 		log.info("[usuario] {}", usuario);
 		return usuario;
 	}
+
+	@Override
+	public void mudaStatusParaFoco(String token, UUID idUsuario) {
+		log.info("[inicia] UsuarioController - mudaStatusParaFoco");
+		String usuarioEmail = getUsuarioByToken(token);
+		usuarioAppplicationService.mudaStatusparaFoco(usuarioEmail, idUsuario);
+		log.info("[finaliza] UsuarioController - mudaStatusParaFoco");
+	}
 }

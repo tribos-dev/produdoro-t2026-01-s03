@@ -49,7 +49,7 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - buscaTarefasDoUsuario");
         return tarefas;
     }
-    
+
     @Override
     public List<Tarefa> buscaTarefaPorIdUsuario(UUID idUsuario) {
         log.info("[inicia] TarefaInfraRepository - buscaTarefaPorIdUsuario");
@@ -73,7 +73,7 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - deletaTodasTarefasConcluidas");
 
     }
-    
+
     public void deletaTodasTarefas(List<Tarefa> tarefas) {
         log.info("[inicia] TarefaInfraRepository - deletaTodasTarefas");
         tarefaSpringMongoDBRepository.deleteAll(tarefas);
@@ -87,5 +87,18 @@ public class TarefaInfraRepository implements TarefaRepository {
                 .findByIdUsuarioAndStatusAtivacao(usuario.getIdUsuario(), StatusAtivacaoTarefa.ATIVA);
         log.info("[finaliza] TarefaInfraRepository - buscaTarefaAtivaDoUsuario");
         return tarefaAtiva;
+    }
+
+    @Override
+    public void salvaTarefas(List<Tarefa> tarefas) {
+        tarefaSpringMongoDBRepository.saveAll(tarefas);
+    }
+
+    @Override
+    public int contaTarefasDoUsuario(UUID idUsuario) {
+        log.info("[inicia] TarefaInfraRepository - contaTarefasDoUsuario");
+        int quantidadeTarefas = tarefaSpringMongoDBRepository.countByIdUsuario(idUsuario);
+        log.info("[finaliza] TarefaInfraRepository - contaTarefasDoUsuario");
+        return quantidadeTarefas;
     }
 }

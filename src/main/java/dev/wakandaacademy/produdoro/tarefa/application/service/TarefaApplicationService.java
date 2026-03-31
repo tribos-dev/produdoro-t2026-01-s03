@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,8 @@ public class TarefaApplicationService implements TarefaService {
     @Override
     public TarefaIdResponse criaNovaTarefa(TarefaRequest tarefaRequest) {
         log.info("[inicia] TarefaApplicationService - criaNovaTarefa");
-        Tarefa tarefaCriada = tarefaRepository.salva(new Tarefa(tarefaRequest));
+        int ordemTarefa = tarefaRepository.contaTarefasDoUsuario(tarefaRequest.getIdUsuario());
+        Tarefa tarefaCriada = tarefaRepository.salva(new Tarefa(tarefaRequest, ordemTarefa));
         log.info("[finaliza] TarefaApplicationService - criaNovaTarefa");
         return TarefaIdResponse.builder().idTarefa(tarefaCriada.getIdTarefa()).build();
     }
@@ -40,7 +42,8 @@ public class TarefaApplicationService implements TarefaService {
         Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
         log.info("[usuarioPorEmail] {}", usuarioPorEmail);
         Tarefa tarefa =
-                tarefaRepository.buscaTarefaPorId(idTarefa).orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
+                tarefaRepository.buscaTarefaPorId(idTarefa)
+                        .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada!"));
         tarefa.pertenceAoUsuario(usuarioPorEmail);
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
         return tarefa;
@@ -145,6 +148,30 @@ public class TarefaApplicationService implements TarefaService {
         tarefa.ativaTarefa();
         tarefaRepository.salva(tarefa);
         log.info("[finish] TarefaApplicationService - defineTarefaComoAtiva");
+    }
+
+    @Override
+    public void alteraOrdemTarefa(String email, UUID idTarefa, int novaPosicao) {
+        log.info("[inicia] TarefaApplicationService - alteraOrdemTarefa");
+        Usuario usuario = usuarioRepository.buscaUsuarioPorEmail(email);
+        validaTarefaDoUsuario(idTarefa, usuario.getIdUsuario());
+        List<Tarefa> tarefas = tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario());
+        Tarefa tarefa = tarefas.stream()
+                .filter(t -> t.getIdTarefa().equals(idTarefa))
+                .findFirst()
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id da tarefa inválido!"));
+        tarefa.alteraOrdem(tarefas, novaPosicao);
+        tarefaRepository.salvaTarefas(tarefas);
+        log.info("[finaliza] TarefaApplicationService - alteraOrdemTarefa");
+    }
+
+    private void validaTarefaDoUsuario(UUID idTarefa, UUID idUsuario) {
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id da tarefa inválido!"));
+        if (!tarefa.getIdUsuario().equals(idUsuario)) {
+            throw APIException.build(HttpStatus.UNAUTHORIZED,
+                    "Usuário(a) não autorizado(a) para a requisição solicitada");
+        }
     }
 
     @Override

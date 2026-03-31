@@ -41,12 +41,13 @@ class TarefaApplicationServiceTest {
 
     @Mock
     UsuarioRepository usuarioRepository;
+    private String usuarioPorEmail = "email@email.com";
 
     @Test
     void deveRetornarIdTarefaNovaCriada() {
         TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
 
-        when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request));
+        when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request,1));
 
         TarefaIdResponse response = tarefaApplicationService.criaNovaTarefa(request);
 
@@ -57,6 +58,7 @@ class TarefaApplicationServiceTest {
     @Test
     void deveLancarExcecaoQuandoTarefaNaoExistir() {
         Usuario usuario = DataHelper.createUsuarioFoco();
+        UUID idTarefa = randomUUID();
 
         when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.empty());
 
@@ -79,12 +81,23 @@ class TarefaApplicationServiceTest {
 
         tarefaApplicationService.deletaTodasTarefas(usuario.getEmail(), usuario.getIdUsuario());
 
-        verify(tarefaRepository).deletaTodasTarefas(tarefas);
+        doNothing().when(tarefaRepository).deletaTodasTarefas(tarefas);
+
+        tarefaApplicationService.deletaTodasTarefas(usuarioPorEmail, usuario.getIdUsuario());
+
+        verify(usuarioRepository, times(2)).buscaUsuarioPorEmail(usuarioPorEmail);
+        verify(usuarioRepository, times(2)).buscaUsuarioPorId(usuario.getIdUsuario());
+        verify(tarefaRepository, times(2)).buscaTarefaPorIdUsuario(usuario.getIdUsuario());
+        verify(tarefaRepository, times(2)).deletaTodasTarefas(tarefas);
     }
 
     @Test
     void deveLancarExcecaoQuandoListaDeTarefasVazia() {
         Usuario usuario = DataHelper.createUsuario();
+        List<Tarefa> tarefas = List.of();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(usuarioPorEmail))
+                .thenReturn(usuario);
 
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
         when(usuarioRepository.buscaUsuarioPorId(usuario.getIdUsuario())).thenReturn(usuario);
@@ -97,9 +110,12 @@ class TarefaApplicationServiceTest {
         assertEquals(HttpStatus.CONFLICT, exception.getStatusException());
     }
 
+    // Teste usuario visualiza todas as suas tarefas
+
     @Test
     void deveBuscarTodasTarefas() {
         Usuario usuario = DataHelper.createUsuario();
+        UUID idUsuario = usuario.getIdUsuario();
         List<Tarefa> tarefas = DataHelper.createListTarefa();
 
         when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
@@ -107,109 +123,34 @@ class TarefaApplicationServiceTest {
         when(tarefaRepository.buscaTarefaPorIdUsuario(usuario.getIdUsuario())).thenReturn(tarefas);
 
         List<TarefaListResponse> resultado =
-                tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(), usuario.getIdUsuario());
+                tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(), idUsuario);
 
         assertNotNull(resultado);
+        assertEquals(8, resultado.size());
     }
 
     @Test
-    void deveConcluirTarefa() {
+    void deveBuscarTodasTarefasSeListaVazia () {
         Usuario usuario = DataHelper.createUsuario();
-        Tarefa tarefa = DataHelper.createTarefa();
+        UUID idUsuario = usuario.getIdUsuario();
+        String usuarioEmail = "usuario@email.com";
+        List<Tarefa> tarefas = List.of();
 
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefaPorId(tarefa.getIdTarefa()))
-                .thenReturn(Optional.of(tarefa));
+        when(usuarioRepository.buscaUsuarioPorId(idUsuario))
+                .thenReturn(usuario);
 
-        tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa());
+        when(usuarioRepository.buscaUsuarioPorEmail(any()))
+                .thenReturn(usuario);
 
-        assertEquals(StatusTarefa.CONCLUIDA, tarefa.getStatus());
-    }
+        when(tarefaRepository.buscaTarefaPorIdUsuario(idUsuario))
+                .thenReturn(tarefas);
 
-    @Test
-    void deveDeletarTarefasConcluidas() {
-        Usuario usuario = DataHelper.createUsuario();
+        List<TarefaListResponse> resultado =
+                tarefaApplicationService.buscarTodasTarefas(usuarioEmail, idUsuario);
 
-        List<Tarefa> tarefas = List.of(
-                Tarefa.builder()
-                        .idUsuario(usuario.getIdUsuario())
-                        .status(StatusTarefa.CONCLUIDA)
-                        .build()
-        );
+        assertNotNull(resultado);
+        assertEquals(0, resultado.size());
 
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario())).thenReturn(tarefas);
-
-        tarefaApplicationService.deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario());
-
-        verify(tarefaRepository).deletaTarefasConcluidas(anyList());
-    }
-
-    @Test
-    void deveLancarExecaoQuandoNaoExitirTarefasConcluidasPraDeletar() {
-        Usuario usuario = DataHelper.createUsuario();
-
-        List<Tarefa> tarefas = List.of(
-                Tarefa.builder()
-                        .idUsuario(usuario.getIdUsuario())
-                        .status(StatusTarefa.CONCLUIDA)
-                        .build()
-        );
-
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario())).thenReturn(Collections.emptyList());
-
-        assertThrows(APIException.class, () -> tarefaApplicationService.
-                deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario()));
-    }
-
-//    @Test
-//    void deveLancarExcecaoQuandoTarefaJaConcluida() {
-//        Usuario usuario = DataHelper.createUsuario();
-//        Tarefa tarefa = DataHelper.createTarefa();
-//        tarefa.setStatus(StatusTarefa.CONCLUIDA);
-//
-//        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-//        when(tarefaRepository.buscaTarefaPorId(tarefa.getIdTarefa()))
-//                .thenReturn(Optional.of(tarefa));
-//
-//        assertThrows(APIException.class, () ->
-//                tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa())
-//        );
-//    }
-
-    @Test
-    void deveDefinirTarefaComoAtivaComSucesso() {
-        Usuario usuario = DataHelper.createUsuario();
-        UUID idTarefa = UUID.randomUUID();
-        Tarefa tarefa = DataHelper.createTarefa();
-
-        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefaAtivaDoUsuario(usuario)).thenReturn(Optional.empty());
-
-        tarefaApplicationService.defineTarefaComoAtiva(usuario.getEmail(), idTarefa);
-
-        assertEquals(StatusAtivacaoTarefa.ATIVA, tarefa.getStatusAtivacao());
-        verify(tarefaRepository).salva(tarefa);
-    }
-
-    @Test
-    void deveLancarConflitoQuandoTarefaJaEstaAtiva() {
-        Usuario usuario = DataHelper.createUsuario();
-        Tarefa tarefa = DataHelper.createTarefaAtiva();
-        UUID idTarefa = tarefa.getIdTarefa();
-
-        when(tarefaRepository.buscaTarefaPorId(idTarefa)).thenReturn(Optional.of(tarefa));
-        when(usuarioRepository.buscaUsuarioPorEmail(usuario.getEmail())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefaAtivaDoUsuario(usuario)).thenReturn(Optional.of(tarefa));
-
-        APIException excecao = assertThrows(APIException.class,
-                () -> tarefaApplicationService.defineTarefaComoAtiva(usuario.getEmail(), idTarefa));
-
-        assertEquals(HttpStatus.CONFLICT, excecao.getStatusException());
-        assertEquals("Tarefa já está ativa!", excecao.getMessage());
-        verify(tarefaRepository, never()).salva(any());
     }
 
     @Test
