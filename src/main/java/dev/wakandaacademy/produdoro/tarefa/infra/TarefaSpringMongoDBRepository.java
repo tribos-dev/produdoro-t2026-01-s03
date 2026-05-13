@@ -1,5 +1,7 @@
 package dev.wakandaacademy.produdoro.tarefa.infra;
 
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -8,7 +10,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TarefaSpringMongoDBRepository extends MongoRepository<Tarefa, UUID> {
-    Optional<Tarefa> findByIdTarefa(UUID idTarefa);
 
+    Optional<Tarefa> findByIdTarefa(UUID idTarefa);
+    List<Tarefa> findAllTarefaByidUsuario(UUID idUsuario);
     List<Tarefa> findAllByIdUsuario(UUID idUsuario);
+    List<Tarefa> findAllByIdUsuarioAndStatus(UUID idUsuario, StatusTarefa statusTarefa);
+    Optional<Tarefa> findByIdUsuarioAndStatusAtivacao(UUID idUsuario, StatusAtivacaoTarefa statusAtivacaoTarefa);
+    int countByIdUsuario(UUID idUsuario);
 }

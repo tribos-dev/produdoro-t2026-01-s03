@@ -29,7 +29,7 @@ public class TarefaListResponse {
         this.status = tarefa.getStatus();
         this.statusAtivacao = tarefa.getStatusAtivacao();
         this.contagemPomodoro = tarefa.getContagemPomodoro();
-        this.posicaoTarefa = tarefa.getPosicaoTarefa();
+        this.posicaoTarefa = tarefa.getOrdemTarefa();
     }
 
     public static List<TarefaListResponse> converte(List<Tarefa> tarefa) {
